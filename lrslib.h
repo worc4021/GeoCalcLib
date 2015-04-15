@@ -1,3 +1,7 @@
+/* 	Last modified: 15/04/2015
+	Modified by Rainer Manuel Schaich (rainer.schaich@eng.ox.ac.uk)
+	Restricted to exclusive use with the GMP library. */
+
 /* lrslib.hpp (vertex enumeration using lexicographic reverse search) */
 #define TITLE "lrslib "
 #define VERSION "v.5.0a 2014.12.2"

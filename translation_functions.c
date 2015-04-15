@@ -1,3 +1,30 @@
+/*  File: translation_functions.c
+  
+    Program: Geometric calculation library
+    
+    Description: The geometric calculation library provides a MATLAB callable
+    functions to compute the vertex enumeration, facet enumeration and projection
+    for convex polyhedra. In addition it provides functions to compute minimal
+    representations of convex polyhedra. The geometric library uses the LRS library,
+    see http://cgm.cs.mcgill.ca/~avis/C/lrs.html for details.
+
+    Copyright (C) 2015  Rainer Manuel Schaich (rainer.schaich@eng.ox.ac.uk)
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin Street, Suite 500, Boston, MA  02110-1335, USA.
+*/
+
 #include <assert.h>
 #include <string.h>
 #include "lrslib.h"
@@ -7,7 +34,7 @@
 #define OUTPUT_PRECISION mxDOUBLE_CLASS
 #define printf mexPrintf
 
-size_t pN = 20;
+size_t pN = 20; /* Number of rows/vertices/rays found between printing out info */
 
 struct GMPmat *GMPmat_fromMXArray (const mxArray *pm)
 {
@@ -149,15 +176,13 @@ int my_lrs_init()
 
 struct GMPmat *H2V(struct GMPmat *inp)
 {
-    lrs_dic *Pv; /* structure for holding current dictionary and indices  */
-    lrs_dat *Qv; /* structure for holding static problem data               */
-    lrs_mp_vector output; /* one line of output:ray,vertex,facet,linearity */
-    lrs_mp_matrix Lin;    /* holds input linearities if any are found      */
+    lrs_dic *Pv;
+    lrs_dat *Qv;
+    lrs_mp_vector output;
+    lrs_mp_matrix Lin;
 
       size_t i;
-      long col;     /* output column index for dictionary            */
-
-      /* Global initialization - done once */
+      long col;
 
       assert( my_lrs_init () == 0 );
 
@@ -166,16 +191,14 @@ struct GMPmat *H2V(struct GMPmat *inp)
 
       Qv->m = GMPmat_Rows(inp);
       Qv->n = GMPmat_Cols(inp);
-      // Qv->printslack = 1L;
-      // Qv->printcobasis = 1L;
-
+      
       output = lrs_alloc_mp_vector (Qv->n);
 
       lrs_mp_vector num, den;
       num = lrs_alloc_mp_vector(GMPmat_Cols(inp));
       den = lrs_alloc_mp_vector(GMPmat_Cols(inp));
 
-      Pv = lrs_alloc_dic (Qv);   /* allocate and initialize lrs_dic      */
+      Pv = lrs_alloc_dic (Qv);
       assert( Pv != NULL );
 
       
@@ -198,7 +221,7 @@ struct GMPmat *H2V(struct GMPmat *inp)
       assert( lrs_getfirstbasis (&Pv, Qv, &Lin, TRUE) );
 
 
-      for (col = 0L; col < Qv->nredundcol; col++)  /* print linearity space */
+      for (col = 0L; col < Qv->nredundcol; col++)
         lrs_printoutput (Qv, Lin[col]); 
 
       do
@@ -216,8 +239,8 @@ struct GMPmat *H2V(struct GMPmat *inp)
         lrs_clear_mp_vector (output, Qv->n);
         lrs_clear_mp_vector (num, Qv->n);
         lrs_clear_mp_vector (den, Qv->n);
-        lrs_free_dic (Pv,Qv);       /* deallocate lrs_dic */
-        lrs_free_dat (Qv);          /* deallocate lrs_dat */
+        lrs_free_dic (Pv,Qv);
+        lrs_free_dat (Qv);
 
         GMPmat_destroy(inp);
         
@@ -587,11 +610,13 @@ struct GMPmat *GMPmat_dropCols(struct GMPmat *A, size_t d)
 
 void GMPmat_everyNrows(struct GMPmat *A, size_t N, char *type)
 {
+  #ifndef NOINFO
   assert ( A != NULL );
   if ( GMPmat_Rows(A) % N == 0 )
   {
     printf( "So far %zu %s found.\n", (GMPmat_Rows(A)/N)*N, type);
   }
+  #endif /* NOINFO */
 }
 
 void GMPmat_invertSignForFacetEnumeration(struct GMPmat *A)

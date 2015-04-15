@@ -1,5 +1,9 @@
 /* lrslib.c     library code for lrs                     */
 
+/* 	Last modified: 15/04/2015
+	Modified by Rainer Manuel Schaich (rainer.schaich@eng.ox.ac.uk)
+	Restricted to exclusive use with the GMP library. */
+
 /* last modified: 2012.10.23                               */
 /* modified by Gary Roumanis for multithread plrs compatability */
 /* truncate needs mod to supress last pivot */
