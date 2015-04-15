@@ -1,9 +1,13 @@
 CFLAGS = -Wall -fpic
-DFLAG = -g
+# DFLAG = -g
 CFLAGS += -DTIMES -DSIGNALS -DB64 -DLRS_QUIET
+
 # Set DEBUG macro for functions to print GMPmat and mpx_t type data in debugger, 
 # set NOINFO macro to avoid printing out number of rows/vertices/rays found during computation.
-CFLAGS += -DDEBUG -DNOINFO
+
+# CFLAGS += -DDEBUG -DNOINFO
+
+# Linker flags, do not modify!
 LFLAGS = -shared -Wl,-no_pie $(GMP) -lmx -lmex -lmat
 
 # Path of GMP shared library, -lgmp does not work! It has to be built with an 64 bit ABI, 
