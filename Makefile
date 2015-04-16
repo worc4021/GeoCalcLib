@@ -7,12 +7,13 @@ CFLAGS += -DTIMES -DSIGNALS -DB64 -DLRS_QUIET
 
 # CFLAGS += -DDEBUG -DNOINFO
 
-# Linker flags, do not modify!
-LFLAGS = -shared -Wl,-no_pie $(GMP) -lmx -lmex -lmat
-
 # Path of GMP shared library, -lgmp does not work! It has to be built with an 64 bit ABI, 
 # i.e. build with ./configure ABI=64 !
-GMP = /Users/Manuel/Documents/Development/GMPFiles/MexExp/lib/libgmp.10.dylib
+GMP = /Users/Manuel/Documents/Development/GMP/lib/libgmp.10.dylib
+
+
+# Linker flags, do not modify!
+LFLAGS = -shared -Wl,-no_pie $(GMP) -lmx -lmex -lmat
 
 MATLABINCLUDEDIR = /Applications/MATLAB_R2015a.app/extern/include/
 MATLABLIB = /Applications/MATLAB_R2015a.app/bin/maci64/

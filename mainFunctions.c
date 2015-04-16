@@ -42,7 +42,6 @@ mxArray *vertexEnumeration(const mxArray *A, const mxArray *b)
 
 	GMPmat_invertSignForFacetEnumeration(myHelp);
 	calcMat = H2V(myHelp);
-	GMPmat_invertSignForFacetEnumeration(calcMat);
 
 	helper = MXArray_fromGMPmat(calcMat);
 	GMPmat_destroy(calcMat);
@@ -85,9 +84,7 @@ mxArray *vertexReduction(const mxArray *V, const mxArray *type)
 
 	mxDestroyArray(helper);
 
-	GMPmat_invertSignForFacetEnumeration(myHelp);
 	myHelp = reducevertices(myHelp);
-	GMPmat_invertSignForFacetEnumeration(myHelp);
 
 	helper = MXArray_fromGMPmat(myHelp);
 	GMPmat_destroy(myHelp);
