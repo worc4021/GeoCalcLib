@@ -542,9 +542,10 @@ void GMPmat_print(const struct GMPmat *A)
 void GMPmat_destroy (struct GMPmat *A)
      {
        assert (A != NULL);
-       for (size_t i = 0; i < GMPmat_Rows(A); ++i)
+       size_t i, j;
+       for (i = 0; i < GMPmat_Rows(A); ++i)
        {
-        for (size_t j = 0; j < GMPmat_Cols(A); ++j)
+        for (j = 0; j < GMPmat_Cols(A); ++j)
         {
             mpq_clear(A->data[i*(A->n) + j]);
         }
@@ -560,7 +561,8 @@ void GMPmat_getRow(mpz_t *ropN, mpz_t *ropD, struct GMPmat *A, size_t r)
 {
     assert( r < A->m );
     assert( ropN != NULL && ropD != NULL );
-    for (size_t i = 0; i < GMPmat_Cols(A); ++i)
+    size_t i;
+    for (i = 0; i < GMPmat_Cols(A); ++i)
     {
         mpz_set(ropN[i], mpq_numref(A->data[r*(A->n) + i]));
         mpz_set(ropD[i], mpq_denref(A->data[r*(A->n) + i]));
@@ -641,7 +643,8 @@ void GMPmat_invertSignForFacetEnumeration(struct GMPmat *A)
 void mpz_row_clean(mpz_t *row, size_t m)
 {
     assert(row != NULL);
-    for (size_t i = 0; i < m; ++i)
+    size_t i;
+    for (i = 0; i < m; ++i)
     {
         mpz_clear(row[i]);
     }
@@ -651,7 +654,8 @@ void mpz_row_clean(mpz_t *row, size_t m)
 void mpq_row_clean(mpq_t *row, size_t m)
 {
     assert(row != NULL);
-    for (size_t i = 0; i < m; ++i)
+    size_t i;
+    for (i = 0; i < m; ++i)
     {
         mpq_clear(row[i]);
     }
@@ -661,7 +665,8 @@ void mpq_row_clean(mpq_t *row, size_t m)
 void mpz_row_init(mpz_t *row, size_t m)
 {
     assert(row != NULL);
-    for (size_t i = 0; i < m; ++i)
+    size_t i;
+    for (i = 0; i < m; ++i)
     {
         mpz_init(row[i]);
     }
@@ -670,7 +675,8 @@ void mpz_row_init(mpz_t *row, size_t m)
 void mpq_row_init(mpq_t *row, size_t m)
 {
     assert(row != NULL);
-    for (size_t i = 0; i < m; ++i)
+    size_t i;
+    for (i = 0; i < m; ++i)
     {
         mpq_init(row[i]);
     }
@@ -681,7 +687,8 @@ void mpz_norm(mpz_t norm, mpz_t *row, size_t m)
     assert( row != NULL );
     mpz_t help;
     mpz_init(help);
-    for (size_t i = 0; i < m; ++i)
+    size_t i;
+    for (i = 0; i < m; ++i)
     {
         mpz_addmul(help, row[i], row[i]);
     }
@@ -831,7 +838,8 @@ mpq_t *mpq_row_extract(const struct GMPmat *A, size_t r)
 void lprint(long *array, size_t l)
 {
     fprintf(stdout, "\n");
-    for (size_t i = 0; i < l; i++)
+    size_t i;
+    for (i = 0; i < l; i++)
         fprintf(stdout, "%ld ", array[i]);
     fprintf(stdout, "\n");
 }
