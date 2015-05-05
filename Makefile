@@ -7,10 +7,14 @@ CFLAGS += -DTIMES -DSIGNALS -DB64 -DLRS_QUIET -DNOINFO
 
 # CFLAGS += -DDEBUG
 
+
+# File extension for shared libraries:
+EXTENTION = dylib
+
 # Path of GMP shared library, -lgmp does not work! It has to be built with an 64 bit ABI, 
 # i.e. build with ./configure ABI=64 !
 GMPdir = /Users/Manuel/Documents/Development/GMP
-GMPlib = $(GMPdir)/lib/libgmp.10.dylib
+GMPlib = $(GMPdir)/lib/libgmp.$(EXTENTION)
 GMPinc = $(GMPdir)/include/
 
 
@@ -19,14 +23,14 @@ LFLAGS = -shared -Wl,-no_pie $(GMPlib) -lmx -lmex -lmat
 
 MATLABROOT = /Applications/MATLAB_R2015a.app
 MATLABINCLUDEDIR = $(MATLABROOT)/extern/include/
+
+# Modify for your distribution:
 MATLABLIB = $(MATLABROOT)/bin/maci64/
 
 # Path to which everything should be installed, has to be on Matlab path!
 INSTALLDIR = /Users/Manuel/Documents/MATLAB/Funktionen/
 
 OBJECTS = mainFunctions.o translation_functions.o lrslib.o lrsgmp.o
-
-EXTENTION = dylib
 
 
 all: libgeocalc.$(EXTENTION)
