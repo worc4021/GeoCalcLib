@@ -218,7 +218,7 @@ struct GMPmat *H2V(struct GMPmat *inp)
         lrs_set_row_mp(Pv,Qv,i,num,den,GE);
       }
 
-      assert( lrs_getfirstbasis (&Pv, Qv, &Lin, TRUE) );
+      if( lrs_getfirstbasis (&Pv, Qv, &Lin, TRUE) ){
 
 
       for (col = 0L; col < Qv->nredundcol; col++)
@@ -245,6 +245,21 @@ struct GMPmat *H2V(struct GMPmat *inp)
         GMPmat_destroy(inp);
         
         return Helper;
+
+      } else {
+
+        mpq_row_clean(curRow, GMPmat_Cols(Helper));
+        lrs_clear_mp_vector (output, Qv->n);
+        lrs_clear_mp_vector (num, Qv->n);
+        lrs_clear_mp_vector (den, Qv->n);
+        lrs_free_dic (Pv,Qv);
+        lrs_free_dat (Qv);
+        
+        GMPmat_destroy(inp);
+
+        return Helper;
+
+      }
 }
 
 struct GMPmat *V2H(struct GMPmat *inp)
@@ -290,7 +305,7 @@ struct GMPmat *V2H(struct GMPmat *inp)
       lrs_set_row_mp(P ,Q ,i ,num ,den , GE);
     }
 
-    assert ( lrs_getfirstbasis (&P, Q, &Lin, TRUE) );
+    if ( lrs_getfirstbasis (&P, Q, &Lin, TRUE) ){
     
     for (col = 0L; col < Q->nredundcol; col++)
       lrs_printoutput (Q, Lin[col]);
@@ -316,6 +331,21 @@ struct GMPmat *V2H(struct GMPmat *inp)
     GMPmat_destroy(inp);
 
     return retMat;
+
+  } else {
+
+    mpq_row_clean( curRow, GMPmat_Cols(retMat) );
+    lrs_clear_mp_vector ( output, Q->n);
+    lrs_clear_mp_vector ( num, Q->n);
+    lrs_clear_mp_vector ( den, Q->n);
+    lrs_free_dic ( P , Q);
+    lrs_free_dat ( Q );
+
+    GMPmat_destroy(inp);
+
+    return retMat;
+
+  }
 
 }
 
@@ -359,7 +389,7 @@ struct GMPmat *reducemat(struct GMPmat *inp)
       lrs_set_row_mp(P ,Q ,i ,num ,den , GE);
     }
 
-    assert ( lrs_getfirstbasis (&P, Q, &Lin, TRUE) );
+    if ( lrs_getfirstbasis (&P, Q, &Lin, TRUE) ){
 
     size_t lastdv = Q->lastdv;
     size_t d = P->d;
@@ -383,7 +413,19 @@ struct GMPmat *reducemat(struct GMPmat *inp)
     GMPmat_destroy(inp);
 
     return retMat;
+
+  } else {
+
+    lrs_clear_mp_vector ( output, Q->n);
+    lrs_free_dic ( P , Q);
+    lrs_free_dat ( Q );
+
+    GMPmat_destroy(inp);
+
+    return retMat;
+
   }
+}
 
 struct GMPmat *reducevertices(struct GMPmat *inp)
 {
@@ -427,7 +469,7 @@ struct GMPmat *reducevertices(struct GMPmat *inp)
       lrs_set_row_mp(P ,Q ,i ,num ,den , GE);
     }
 
-    assert ( lrs_getfirstbasis (&P, Q, &Lin, TRUE) );
+    if ( lrs_getfirstbasis (&P, Q, &Lin, TRUE) ){
 
     size_t lastdv = Q->lastdv;
     size_t d = P->d;
@@ -451,7 +493,19 @@ struct GMPmat *reducevertices(struct GMPmat *inp)
     GMPmat_destroy(inp);
     
     return retMat;
+
+  } else {
+
+    lrs_clear_mp_vector ( output, Q->n);
+    lrs_free_dic ( P , Q);
+    lrs_free_dat ( Q );
+
+    GMPmat_destroy(inp);
+    
+    return retMat;
+    
   }
+}
 
 
 void GMPmat_validate_indices (const struct GMPmat *A, size_t r, size_t c)
