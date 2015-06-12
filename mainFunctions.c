@@ -31,6 +31,9 @@
 
 mxArray *vertexEnumeration(const mxArray *A, const mxArray *b)
 {
+	if( mxGetM(A) != mxGetM(b)) 
+		mexErrMsgIdAndTxt("GeoCalcLib:Dimensions:vertex:Enumeration","Matrices A and b must have same number of rows.\n" );
+
 	mxArray *helper, *retVal;
 	struct GMPmat *myHelp, *calcMat;
 
@@ -48,11 +51,15 @@ mxArray *vertexEnumeration(const mxArray *A, const mxArray *b)
 
 	retVal = VertBreakdown(helper);
 	mxDestroyArray(helper);
+
 	return retVal;
 }
 
 mxArray *facetEnumeration(const mxArray *V, const mxArray *type)
 {
+	if( mxGetM(V) != mxGetM(type)) 
+		mexErrMsgIdAndTxt("GeoCalcLib:Dimensions:facet:Enumeration","Matrices V and type must have same number of rows.\n" );
+
 	mxArray *helper, *retVal;
 	struct GMPmat *myHelp;
 
@@ -76,6 +83,9 @@ mxArray *facetEnumeration(const mxArray *V, const mxArray *type)
 
 mxArray *vertexReduction(const mxArray *V, const mxArray *type)
 {
+	if( mxGetM(V) != mxGetM(type)) 
+		mexErrMsgIdAndTxt("GeoCalcLib:Dimensions:vertex:Reduction","Matrices V and type must have same number of rows.\n" );
+
 	mxArray *helper, *retVal;
 	struct GMPmat *myHelp;
 
@@ -96,6 +106,9 @@ mxArray *vertexReduction(const mxArray *V, const mxArray *type)
 
 mxArray *ineqReduction(const mxArray *A, const mxArray *b)
 {
+	if( mxGetM(A) != mxGetM(b)) 
+		mexErrMsgIdAndTxt("GeoCalcLib:Dimensions:ineq:Reduction","Matrices A and b must have same number of rows.\n" );
+
 	mxArray *helper, *retVal;
 	struct GMPmat *myHelp;
 
@@ -119,10 +132,16 @@ mxArray *ineqReduction(const mxArray *A, const mxArray *b)
 
 mxArray *projection(const mxArray *A, const mxArray *b, const mxArray *dim)
 {
+	if( mxGetM(A) != mxGetM(b)) 
+		mexErrMsgIdAndTxt("GeoCalcLib:Dimensions:projection","Matrices A and b must have same number of rows.\n" );
+
 	mxArray *helper, *retVal;
 	struct GMPmat *myHelp;
 
 	size_t d = MXArray_to_integer(dim);
+
+	if ( mxGetN(A) <= d)
+		mexErrMsgIdAndTxt("GeoCalcLib:Codimension:projection","dim must smaller than number of columns of A.\n");
 
 	helper = VertConcat( b , A );
 	myHelp = GMPmat_fromMXArray( helper );
