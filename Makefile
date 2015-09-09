@@ -1,11 +1,14 @@
 UNAME_S := $(shell uname -s)
 
-MATLABROOT = /Applications/MATLAB_R2015a.app
+MATLABROOT = /usr/local/MATLAB/R2014a
 MATLABINCLUDEDIR = $(MATLABROOT)/extern/include/
+
+# Modify for your distribution:
+MATLABLIB = $(MATLABROOT)/bin/glnxa64/
 
 
 CFLAGS = -Wall -fpic
-# DFLAG = -g
+DFLAG = -g
 CFLAGS += -DTIMES -DSIGNALS -DB64 -DLRS_QUIET -DNOINFO
 
 
@@ -20,16 +23,14 @@ LFLAGS = -shared -lmx -lmex -lmat -lgmp -L$(MATLABLIB)
 ifeq ($(UNAME_S),Darwin)
 	LFLAGS += -Wl,-no_pie
 	EXTENTION = dylib
-	MATLABLIB = $(MATLABROOT)/bin/maci64/
 endif
 ifeq ($(UNAME_S),Linux)
 	LFLAGS += -Wl,-rpath,$(MATLABLIB)
 	EXTENTION = so
-	MATLABLIB = $(MATLABROOT)/bin/glnxa64/
 endif
 
 # Path to which everything should be installed, has to be on Matlab path!
-INSTALLDIR = /Users/Manuel/Documents/MATLAB/Funktionen/
+INSTALLDIR = /home/worc4021/MATLAB/
 
 OBJECTS = mainFunctions.o translation_functions.o lrslib.o lrsgmp.o
 
@@ -41,7 +42,7 @@ all: libgeocalc.$(EXTENTION)
 
 
 libgeocalc.$(EXTENTION): $(OBJECTS)
-	$(CC) $(LFLAGS) $^ -o libgeocalc.$(EXTENTION) 
+	$(CC) $(DFLAG) $(LFLAGS) $^ -o libgeocalc.$(EXTENTION) 
 
 .c.o:
 	$(CC) $(DFLAG) $(CFLAGS) -I$(MATLABINCLUDEDIR) $< -o $@ -c
