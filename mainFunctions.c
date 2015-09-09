@@ -31,8 +31,11 @@
 
 mxArray *vertexEnumeration(const mxArray *A, const mxArray *b)
 {
-	if( mxGetM(A) != mxGetM(b)) 
+	if( mxGetM(A) != mxGetM(b) )
 		mexErrMsgIdAndTxt("GeoCalcLib:Dimensions:vertex:Enumeration","Matrices A and b must have same number of rows.\n" );
+
+	if( mxIsEmpty(A) || mxIsEmpty(b) )
+		mexErrMsgIdAndTxt("GeoCalcLib:Dimensions:vertex:Enumeration","Matrices must not be empty.\n" );
 
 	mxArray *helper, *retVal;
 	struct GMPmat *myHelp, *calcMat;
@@ -41,16 +44,20 @@ mxArray *vertexEnumeration(const mxArray *A, const mxArray *b)
 	myHelp = GMPmat_fromMXArray( helper );
 	
 	mxDestroyArray(helper);
-	
 
 	GMPmat_invertSignForFacetEnumeration(myHelp);
 	calcMat = H2V(myHelp);
 
-	helper = MXArray_fromGMPmat(calcMat);
-	GMPmat_destroy(calcMat);
+	if (!calcMat->empty) {
+		helper = MXArray_fromGMPmat(calcMat);
+		GMPmat_destroy(calcMat);
 
-	retVal = VertBreakdown(helper);
-	mxDestroyArray(helper);
+		retVal = VertBreakdown(helper);
+		mxDestroyArray(helper);
+	} else {
+		GMPmat_destroy(calcMat);
+		retVal = createEmptyCell();
+	}
 
 	return retVal;
 }
@@ -59,6 +66,9 @@ mxArray *facetEnumeration(const mxArray *V, const mxArray *type)
 {
 	if( mxGetM(V) != mxGetM(type)) 
 		mexErrMsgIdAndTxt("GeoCalcLib:Dimensions:facet:Enumeration","Matrices V and type must have same number of rows.\n" );
+
+	if( mxIsEmpty(V) || mxIsEmpty(type) )
+		mexErrMsgIdAndTxt("GeoCalcLib:Dimensions:vertex:Enumeration","Matrices must not be empty.\n" );
 
 	mxArray *helper, *retVal;
 	struct GMPmat *myHelp;
@@ -70,14 +80,20 @@ mxArray *facetEnumeration(const mxArray *V, const mxArray *type)
 
 	myHelp = reducevertices(myHelp);
 	myHelp = V2H(myHelp);
-	myHelp = reducemat(myHelp);
-	GMPmat_invertSignForFacetEnumeration(myHelp);
+	if (!myHelp->empty) {
 
-	helper = MXArray_fromGMPmat(myHelp);
-	GMPmat_destroy(myHelp);
+		myHelp = reducemat(myHelp);
+		GMPmat_invertSignForFacetEnumeration(myHelp);
 
-	retVal = VertBreakdown(helper);
-	mxDestroyArray(helper);
+		helper = MXArray_fromGMPmat(myHelp);
+		GMPmat_destroy(myHelp);
+
+		retVal = VertBreakdown(helper);
+		mxDestroyArray(helper);
+	} else {
+		GMPmat_destroy(myHelp);
+		retVal = createEmptyCell();
+	}
 	return retVal;
 }
 
@@ -85,6 +101,9 @@ mxArray *vertexReduction(const mxArray *V, const mxArray *type)
 {
 	if( mxGetM(V) != mxGetM(type)) 
 		mexErrMsgIdAndTxt("GeoCalcLib:Dimensions:vertex:Reduction","Matrices V and type must have same number of rows.\n" );
+
+	if( mxIsEmpty(V) || mxIsEmpty(type) )
+		mexErrMsgIdAndTxt("GeoCalcLib:Dimensions:vertex:Enumeration","Matrices must not be empty.\n" );
 
 	mxArray *helper, *retVal;
 	struct GMPmat *myHelp;
@@ -95,12 +114,17 @@ mxArray *vertexReduction(const mxArray *V, const mxArray *type)
 	mxDestroyArray(helper);
 
 	myHelp = reducevertices(myHelp);
+	if (!myHelp->empty) {
+		helper = MXArray_fromGMPmat(myHelp);
+		GMPmat_destroy(myHelp);
 
-	helper = MXArray_fromGMPmat(myHelp);
-	GMPmat_destroy(myHelp);
+		retVal = VertBreakdown(helper);
+		mxDestroyArray(helper);
 
-	retVal = VertBreakdown(helper);
-	mxDestroyArray(helper);
+	} else {
+		GMPmat_destroy(myHelp);
+		retVal = createEmptyCell();
+	}
 	return retVal;
 }
 
@@ -108,6 +132,9 @@ mxArray *ineqReduction(const mxArray *A, const mxArray *b)
 {
 	if( mxGetM(A) != mxGetM(b)) 
 		mexErrMsgIdAndTxt("GeoCalcLib:Dimensions:ineq:Reduction","Matrices A and b must have same number of rows.\n" );
+
+	if( mxIsEmpty(A) || mxIsEmpty(b) )
+		mexErrMsgIdAndTxt("GeoCalcLib:Dimensions:vertex:Enumeration","Matrices must not be empty.\n" );
 
 	mxArray *helper, *retVal;
 	struct GMPmat *myHelp;
@@ -119,6 +146,7 @@ mxArray *ineqReduction(const mxArray *A, const mxArray *b)
 
 	GMPmat_invertSignForFacetEnumeration(myHelp);
 	myHelp = reducemat(myHelp);
+	if (!myHelp->empty) {
 	GMPmat_invertSignForFacetEnumeration(myHelp);
 
 	helper = MXArray_fromGMPmat(myHelp);
@@ -126,6 +154,10 @@ mxArray *ineqReduction(const mxArray *A, const mxArray *b)
 
 	retVal = VertBreakdown(helper);
 	mxDestroyArray(helper);
+	} else {
+		GMPmat_destroy(myHelp);
+		retVal = createEmptyCell();
+	}
 	return retVal;
 
 }
@@ -135,8 +167,13 @@ mxArray *projection(const mxArray *A, const mxArray *b, const mxArray *dim)
 	if( mxGetM(A) != mxGetM(b)) 
 		mexErrMsgIdAndTxt("GeoCalcLib:Dimensions:projection","Matrices A and b must have same number of rows.\n" );
 
+	if( mxIsEmpty(A) || mxIsEmpty(b) )
+		mexErrMsgIdAndTxt("GeoCalcLib:Dimensions:vertex:Enumeration","Matrices must not be empty.\n" );
+
 	mxArray *helper, *retVal;
 	struct GMPmat *myHelp;
+
+	char BREAK = 0;
 
 	size_t d = MXArray_to_integer(dim);
 
@@ -150,17 +187,46 @@ mxArray *projection(const mxArray *A, const mxArray *b, const mxArray *dim)
 
 	GMPmat_invertSignForFacetEnumeration(myHelp);
 	myHelp = H2V(myHelp);
-	myHelp = GMPmat_dropCols(myHelp, d);
-	myHelp = reducevertices(myHelp);
-	myHelp = V2H(myHelp);
-	myHelp = reducemat(myHelp);
-	GMPmat_invertSignForFacetEnumeration(myHelp);
+	if (!myHelp->empty) 
+	{
+		myHelp = GMPmat_dropCols(myHelp, d);
+		myHelp = reducevertices(myHelp);
+		
+		if (!myHelp->empty) 
+		{
+			myHelp = V2H(myHelp);
+			
+			if (!myHelp->empty) 
+			{
+				myHelp = reducemat(myHelp);
+				GMPmat_invertSignForFacetEnumeration(myHelp);
+				helper = MXArray_fromGMPmat(myHelp);
+				GMPmat_destroy(myHelp);
 
-	helper = MXArray_fromGMPmat(myHelp);
-	GMPmat_destroy(myHelp);
-
-	retVal = VertBreakdown(helper);
-	mxDestroyArray(helper);
+				retVal = VertBreakdown(helper);
+				mxDestroyArray(helper);
+			}
+			else
+			{
+			BREAK = 1;
+			}
+		} 
+		else
+		{
+			BREAK = 1;
+		}
+	} 
+	else
+	{ 
+		BREAK = 1;
+	}
+	
+	if (BREAK) 
+	{
+		GMPmat_destroy(myHelp);
+		retVal = createEmptyCell();
+	}
+	
 	return retVal;
 
 }

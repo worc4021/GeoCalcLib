@@ -41,7 +41,7 @@ all: libgeocalc.$(EXTENTION)
 
 
 libgeocalc.$(EXTENTION): $(OBJECTS)
-	$(CC) $(LFLAGS) $^ -o libgeocalc.$(EXTENTION) 
+	$(CC) $(LFLAGS) $(DFLAG) $^ -o libgeocalc.$(EXTENTION) 
 
 .c.o:
 	$(CC) $(DFLAG) $(CFLAGS) -I$(MATLABINCLUDEDIR) $< -o $@ -c

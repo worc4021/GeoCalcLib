@@ -32,6 +32,7 @@
 struct GMPmat{
     mpq_t *data;
     size_t m, n;
+    char empty;
 };
 
 /* Interface between mxArray and GMPmat structures */
@@ -41,6 +42,7 @@ mxArray *MXArray_fromGMPmat(const struct GMPmat *A);
 size_t MXArray_to_integer(const mxArray *pm);
 mxArray *VertConcat(const mxArray *A, const mxArray *b);
 mxArray *VertBreakdown(const mxArray *res);
+mxArray *createEmptyCell( );
 
 /* Interface to the LRS library */
 
@@ -83,6 +85,7 @@ void mpq_row_init(mpq_t *row, size_t m);
 void mpz_row_init(mpz_t *row, size_t m);
 void mpq_row_clean(mpq_t *row, size_t m);
 void mpz_row_clean(mpz_t *row, size_t m);
+
 
 #ifdef DEBUG
 void mpz_row_print(mpz_t *row, size_t n);

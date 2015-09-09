@@ -163,6 +163,30 @@ mxArray *VertBreakdown(const mxArray *res)
 
 }
 
+mxArray *createEmptyCell( )
+{
+  mxArray *A, *b;
+  A = mxCreateNumericMatrix(0, 0, mxDOUBLE_CLASS, mxREAL);
+  b = mxCreateNumericMatrix(0, 0, mxDOUBLE_CLASS, mxREAL);
+
+  mxArray *retVal;
+  mwSize ndim=2, dims[]={1, 2}, nsubs=2, subs[2];
+  mwIndex index;
+  retVal = mxCreateCellArray( ndim, dims );
+
+  subs[0] = 0;
+  subs[1] = 0;
+  index = mxCalcSingleSubscript(retVal, nsubs, subs);
+  mxSetCell (retVal, index , A);
+
+  subs[1] = 1;
+  index = mxCalcSingleSubscript(retVal, nsubs, subs);
+  mxSetCell (retVal, index , b);
+
+  return retVal;
+
+}
+
 int my_lrs_init()
 {
     assert ( lrs_mp_init (ZERO, stdin, stdout) );
@@ -248,6 +272,7 @@ struct GMPmat *H2V(struct GMPmat *inp)
 
       } else {
 
+        printf("Empty set.\n");
         mpq_row_clean(curRow, GMPmat_Cols(Helper));
         lrs_clear_mp_vector (output, Qv->n);
         lrs_clear_mp_vector (num, Qv->n);
@@ -302,6 +327,10 @@ struct GMPmat *V2H(struct GMPmat *inp)
     for (i = 1; i <= GMPmat_Rows(inp); ++i)
     {
       GMPmat_getRow(num, den, inp, i-1);
+      if ( zero(num[0]) ) {
+          Q->polytope = FALSE;
+          Q->homogeneous = FALSE;
+        }
       lrs_set_row_mp(P ,Q ,i ,num ,den , GE);
     }
 
@@ -334,6 +363,8 @@ struct GMPmat *V2H(struct GMPmat *inp)
 
   } else {
 
+    printf("Empty set.\n");
+    retMat->empty = 1;
     mpq_row_clean( curRow, GMPmat_Cols(retMat) );
     lrs_clear_mp_vector ( output, Q->n);
     lrs_clear_mp_vector ( num, Q->n);
@@ -416,6 +447,8 @@ struct GMPmat *reducemat(struct GMPmat *inp)
 
   } else {
 
+    printf("Empty set.\n");
+    retMat->empty = 1;
     lrs_clear_mp_vector ( output, Q->n);
     lrs_free_dic ( P , Q);
     lrs_free_dat ( Q );
@@ -496,6 +529,8 @@ struct GMPmat *reducevertices(struct GMPmat *inp)
 
   } else {
 
+    printf("Empty set.\n");
+    retMat->empty = 1;
     lrs_clear_mp_vector ( output, Q->n);
     lrs_free_dic ( P , Q);
     lrs_free_dat ( Q );
@@ -551,6 +586,7 @@ struct GMPmat *GMPmat_create (size_t m, size_t n, int init)
        A = calloc (1, sizeof (*A));
        assert (A != NULL);
 
+       A->empty = 0;
        A->m    = m;
        A->n    = n;
        A->data = calloc (m*n, sizeof(*A->data));
