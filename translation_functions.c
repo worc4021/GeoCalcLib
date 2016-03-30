@@ -36,6 +36,19 @@
 
 size_t pN = 20; /* Number of rows/vertices/rays found between printing out info */
 
+static long lrs_checkpoint_seconds = 0;
+
+static long lrs_global_count = 0;
+
+#ifdef SIGNALS
+static void checkpoint ();
+static void die_gracefully ();
+static void setup_signals ();
+static void timecheck ();
+#endif
+
+static void lrs_dump_state () {};
+
 struct GMPmat *GMPmat_fromMXArray (const mxArray *pm)
 {
        struct GMPmat *A;
@@ -189,13 +202,13 @@ mxArray *createEmptyCell( )
 
 int my_lrs_init()
 {
-    assert ( lrs_mp_init (ZERO, stdin, stdout) );
-    lrs_global_count = 0;
-    lrs_checkpoint_seconds = 0;
+  assert ( lrs_mp_init (ZERO, stdin, stdout) );
+  lrs_global_count = 0;
+  lrs_checkpoint_seconds = 0;
 #ifdef SIGNALS
-    setup_signals();
+  setup_signals ();
 #endif
-    return 0;
+  return TRUE;
 }
 
 struct GMPmat *H2V(struct GMPmat *inp)
@@ -208,7 +221,7 @@ struct GMPmat *H2V(struct GMPmat *inp)
       size_t i;
       long col;
 
-      assert( my_lrs_init () == 0 );
+      assert( my_lrs_init () == TRUE );
 
       Qv = lrs_alloc_dat ("LRS globals");
       assert( Qv!= NULL );
@@ -297,7 +310,7 @@ struct GMPmat *V2H(struct GMPmat *inp)
     long i;
     long col;
 
-    assert( my_lrs_init () == 0 );
+    assert( my_lrs_init () == TRUE );
 
     Q = lrs_alloc_dat ("LRS globals");
     assert ( Q != NULL );
@@ -395,7 +408,7 @@ struct GMPmat *reducemat(struct GMPmat *inp)
     redRows = malloc( m*sizeof(*redRows) );
     assert( redRows != NULL );
 
-    assert( my_lrs_init () == 0 );
+    assert( my_lrs_init () == TRUE );
 
     Q = lrs_alloc_dat ("LRS globals");
     assert ( Q != NULL );
@@ -475,7 +488,7 @@ struct GMPmat *reducevertices(struct GMPmat *inp)
     redRows = malloc( m*sizeof(*redRows) );
     assert( redRows != NULL );
 
-    assert( my_lrs_init () == 0 );
+    assert( my_lrs_init () == TRUE );
 
     Q = lrs_alloc_dat ("LRS globals");
     assert ( Q != NULL );
@@ -933,3 +946,48 @@ void lprint(long *array, size_t l)
         fprintf(stdout, "%ld ", array[i]);
     fprintf(stdout, "\n");
 }
+
+
+#ifdef SIGNALS
+
+/*
+   If given a signal
+   USR1            print current cobasis and continue
+   TERM            print current cobasis and terminate
+   INT (ctrl-C) ditto
+   HUP                     ditto
+ */
+static void
+setup_signals ()
+{
+  errcheck ("signal", signal (SIGTERM, die_gracefully));
+  errcheck ("signal", signal (SIGALRM, timecheck));
+  errcheck ("signal", signal (SIGHUP, die_gracefully));
+  errcheck ("signal", signal (SIGINT, die_gracefully));
+  errcheck ("signal", signal (SIGUSR1, checkpoint));
+}
+
+static void
+timecheck ()
+{
+  lrs_dump_state ();
+  errcheck ("signal", signal (SIGALRM, timecheck));
+  alarm (lrs_checkpoint_seconds);
+}
+
+static void
+checkpoint ()
+{
+  lrs_dump_state ();
+  errcheck ("signal", signal (SIGUSR1, checkpoint));
+}
+
+static void
+die_gracefully ()
+{
+  lrs_dump_state ();
+
+  exit (1);
+}
+
+#endif

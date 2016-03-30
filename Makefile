@@ -1,6 +1,10 @@
 UNAME_S := $(shell uname -s)
 
+<<<<<<< HEAD
 MATLABROOT = /usr/local/MATLAB/R2014a
+=======
+MATLABROOT = /Applications/MATLAB_R2016a.app
+>>>>>>> db6ba1cb04a1e45d241a2bf2a73c558aa1347544
 MATLABINCLUDEDIR = $(MATLABROOT)/extern/include/
 
 # Modify for your distribution:
@@ -8,13 +12,13 @@ MATLABLIB = $(MATLABROOT)/bin/glnxa64/
 
 
 CFLAGS = -Wall -fpic
-# DFLAG = -g
-CFLAGS += -DTIMES -DSIGNALS -DB64 -DLRS_QUIET -DNOINFO
+DFLAG = -g
+CFLAGS += -DGMP -DTIMES -DSIGNALS -DB64 -DLRS_QUIET -DNOINFO
 
 
 # Set DEBUG macro for functions to print GMPmat and mpx_t type data in debugger, 
 # set NOINFO macro to avoid printing out number of rows/vertices/rays found during computation.
-# CFLAGS += -DDEBUG
+CFLAGS += -DDEBUG
 
 
 # Linker flags, do not modify!

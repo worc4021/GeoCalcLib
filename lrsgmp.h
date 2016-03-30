@@ -126,11 +126,6 @@ using namespace std;
 #define errcheck(s,e) if ((long)(e)==-1L){  perror(s);exit(1);}
 #endif
 
-#ifndef OMIT_TIMES
-void ptimes ();
-#endif
-
-
 #define CALLOC(n,s) xcalloc(n,s,__LINE__,__FILE__)
 
 /*************/
@@ -224,4 +219,3 @@ void lrs_default_digits_overflow ();
 
 /* end of  lrs_mp.h (vertex enumeration using lexicographic reverse search) */
 
-// void exactdivint(mpz_t a, const mpz_t b, const mpz_t c);
