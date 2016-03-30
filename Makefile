@@ -1,17 +1,17 @@
 UNAME_S := $(shell uname -s)
 
-MATLABROOT = /Applications/MATLAB_R2015a.app
+MATLABROOT = /Applications/MATLAB_R2016a.app
 MATLABINCLUDEDIR = $(MATLABROOT)/extern/include/
 
 
 CFLAGS = -Wall -fpic
-# DFLAG = -g
-CFLAGS += -DTIMES -DSIGNALS -DB64 -DLRS_QUIET -DNOINFO
+DFLAG = -g
+CFLAGS += -DGMP -DTIMES -DSIGNALS -DB64 -DLRS_QUIET -DNOINFO
 
 
 # Set DEBUG macro for functions to print GMPmat and mpx_t type data in debugger, 
 # set NOINFO macro to avoid printing out number of rows/vertices/rays found during computation.
-# CFLAGS += -DDEBUG
+CFLAGS += -DDEBUG
 
 
 # Linker flags, do not modify!

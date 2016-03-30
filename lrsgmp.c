@@ -229,7 +229,7 @@ readrat (lrs_mp Na, lrs_mp Da)	/* read a rational or integer and convert to lrs_
   char in[MAXINPUT], num[MAXINPUT], den[MAXINPUT];
   if(fscanf (lrs_ifp, "%s", in)==EOF)
                  {
-                   fprintf (lrs_ofp, "\nInvalid rational input");
+                   fprintf (lrs_ofp, "\nInvalid input: check you have entered enough data!\n");
                    exit(1);
                  }
 
@@ -561,23 +561,3 @@ storesign(lrs_mp a, long sa)
       mpz_neg(a,a);
 }
 
-// void exactdivint(mpz_t a, const mpz_t b, const mpz_t c)
-// {
-//   mpq_t temp;
-//   mpz_t num, den;
-//   mpz_init(num);
-//   mpz_init(den);
-//   mpq_init(temp);
-//   if (!zero(c))
-//   {
-//    mpq_set_num(temp, b);
-//    mpq_set_den(temp, c);
-//   }
-//   mpq_canonicalize(temp);
-//   mpq_get_num(num, temp);
-//   mpq_get_den(den, temp);
-//   mpz_mul(a, num, den);
-//   mpz_clear(num);
-//   mpz_clear(den);
-//   mpq_clear(temp);
-// }
