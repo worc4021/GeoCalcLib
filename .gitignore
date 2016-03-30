@@ -3,3 +3,4 @@
 *.o
 *.mexmaci64
 *.dylib
+Makefile
