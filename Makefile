@@ -8,7 +8,7 @@ MATLABLIB = $(MATLABROOT)/bin/glnxa64/
 
 
 CFLAGS = -Wall -fpic
-DFLAG = -g
+# DFLAG = -g
 CFLAGS += -DTIMES -DSIGNALS -DB64 -DLRS_QUIET -DNOINFO
 
 
@@ -42,7 +42,7 @@ all: libgeocalc.$(EXTENTION)
 
 
 libgeocalc.$(EXTENTION): $(OBJECTS)
-	$(CC) $(DFLAG) $(LFLAGS) $^ -o libgeocalc.$(EXTENTION) 
+	$(CC) $(LFLAGS) $(DFLAG) $^ -o libgeocalc.$(EXTENTION) 
 
 .c.o:
 	$(CC) $(DFLAG) $(CFLAGS) -I$(MATLABINCLUDEDIR) $< -o $@ -c
