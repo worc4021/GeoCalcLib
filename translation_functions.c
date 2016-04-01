@@ -28,11 +28,18 @@
 #include <assert.h>
 #include <string.h>
 #include "lrslib.h"
+
+#ifndef NOMATLAB
 #include "tmwtypes.h"
+#endif
+
 #include "translation_functions.h"
 
 #define OUTPUT_PRECISION mxDOUBLE_CLASS
+
+#ifndef NOMATLAB
 #define printf mexPrintf
+#endif /* NOMATLAB */
 
 size_t pN = 20; /* Number of rows/vertices/rays found between printing out info */
 
@@ -48,6 +55,8 @@ static void timecheck ();
 #endif
 
 static void lrs_dump_state () {};
+
+#ifndef NOMATLAB
 
 struct GMPmat *GMPmat_fromMXArray (const mxArray *pm)
 {
@@ -199,6 +208,7 @@ mxArray *createEmptyCell( )
   return retVal;
 
 }
+#endif /* NOMATLAB */
 
 int my_lrs_init()
 {
@@ -597,13 +607,13 @@ struct GMPmat *GMPmat_create (size_t m, size_t n, int init)
        struct GMPmat *A;
        size_t         i, j;
 
-       A = calloc (1, sizeof (*A));
+       A = malloc (sizeof (*A));
        assert (A != NULL);
 
        A->empty = 0;
        A->m    = m;
        A->n    = n;
-       A->data = calloc (m*n, sizeof(*A->data));
+       A->data = malloc (m*n*sizeof(*A->data));
        assert (A->data != NULL );
 
        if (init != 0)

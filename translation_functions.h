@@ -26,14 +26,18 @@
 */
 
 #include <gmp.h>
-#include "mex.h"
-#include "matrix.h"
 
 struct GMPmat{
     mpq_t *data;
     size_t m, n;
     char empty;
 };
+
+#ifndef NOMATLAB
+
+#include "mex.h"
+#include "matrix.h"
+
 
 /* Interface between mxArray and GMPmat structures */
 
@@ -43,6 +47,8 @@ size_t MXArray_to_integer(const mxArray *pm);
 mxArray *VertConcat(const mxArray *A, const mxArray *b);
 mxArray *VertBreakdown(const mxArray *res);
 mxArray *createEmptyCell( );
+
+#endif /* NOMATLAB */
 
 /* Interface to the LRS library */
 
@@ -54,24 +60,19 @@ struct GMPmat *reducevertices(struct GMPmat *inp);
 
 /* Functions to work with GMPmat structures */
 
-void GMPmat_getRow(mpz_t *ropN, mpz_t *ropD, struct GMPmat *A, size_t r);
-void GMPmat_destroy (struct GMPmat *A);
-
 #ifdef DEBUG
 void GMPmat_print(const struct GMPmat *A);
+void GMPmat_printRow(const struct GMPmat *A, size_t r);
 #endif /* DEBUG */
 
+void GMPmat_getRow(mpz_t *ropN, mpz_t *ropD, struct GMPmat *A, size_t r);
+void GMPmat_destroy (struct GMPmat *A);
 struct GMPmat *GMPmat_create (size_t m, size_t n, int init);
 size_t GMPmat_Rows (const struct GMPmat *A);
 size_t GMPmat_Cols (const struct GMPmat *A);
 void GMPmat_setValue (const struct GMPmat *A, size_t r, size_t c, double val);
 void GMPmat_getValue (mpq_t rop, const struct GMPmat *A, size_t r, size_t c);
 void GMPmat_validate_indices (const struct GMPmat *A, size_t r, size_t c);
-
-#ifdef DEBUG
-void GMPmat_printRow(const struct GMPmat *A, size_t r);
-#endif /* DEBUG */
-
 struct GMPmat *GMPmat_dropCols(struct GMPmat *A, size_t d);
 void GMPmat_everyNrows(struct GMPmat *A, size_t N, char *type);
 void GMPmat_invertSignForFacetEnumeration(struct GMPmat *A);
