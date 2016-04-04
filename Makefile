@@ -54,5 +54,5 @@ clean:
 testcase: CFLAGS += -DNOMATLAB -DDEBUG
 
 testcase: $(TESTOBJECTS)
-	$(CC) -lgmp $(DFLAG) $^ -o testcase
+	$(CC) -lgmp -lm $(DFLAG) $^ -o testcase
 

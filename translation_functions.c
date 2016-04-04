@@ -633,16 +633,16 @@ struct GMPmat *GMPmat_create (size_t m, size_t n, int init)
 void GMPmat_print(const struct GMPmat *A)
 {
     const char *val;
-
+    size_t i, j;
     val = getenv ("SILENCE");
     if (val != NULL)
         return;
 
     assert( A!= NULL );
     fprintf(stdout, "\n");
-    for (size_t i = 0; i < GMPmat_Rows(A); ++i)
+    for (i = 0; i < GMPmat_Rows(A); ++i)
     {
-        for (size_t j = 0; j < GMPmat_Cols(A); ++j)
+        for (j = 0; j < GMPmat_Cols(A); ++j)
         {
             mpq_out_str(stdout, 10, A->data[i*(A->n) + j]);
             fprintf(stdout, " ");

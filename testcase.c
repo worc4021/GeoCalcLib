@@ -124,11 +124,12 @@ void GMPmat_printAsDouble(const struct GMPmat *A)
 {
     assert( A!= NULL );
     double curVal;
+    size_t i, j;
     fprintf(stdout, "\n");
     fprintf(stdout, "Matrix has %zu rows and %zu columns.\n", GMPmat_Rows(A), GMPmat_Cols(A));
-    for (size_t i = 0; i < GMPmat_Rows(A); ++i)
+    for (i = 0; i < GMPmat_Rows(A); ++i)
     {
-        for (size_t j = 0; j < GMPmat_Cols(A); ++j)
+        for (j = 0; j < GMPmat_Cols(A); ++j)
         {
         	curVal = mpq_get_d(A->data[i*(A->n) + j]);
             fprintf(stdout, "%5.2f ",curVal);
