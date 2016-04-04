@@ -1,10 +1,6 @@
 UNAME_S := $(shell uname -s)
 
-<<<<<<< HEAD
 MATLABROOT = /usr/local/MATLAB/R2014a
-=======
-MATLABROOT = /Applications/MATLAB_R2016a.app
->>>>>>> db6ba1cb04a1e45d241a2bf2a73c558aa1347544
 MATLABINCLUDEDIR = $(MATLABROOT)/extern/include/
 
 # Modify for your distribution:
