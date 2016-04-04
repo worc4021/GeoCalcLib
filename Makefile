@@ -14,7 +14,7 @@ CFLAGS += -DGMP -DTIMES -DSIGNALS -DB64 -DLRS_QUIET -DNOINFO
 # Set DEBUG macro for functions to print GMPmat and mpx_t type data in debugger, 
 # set NOINFO macro to avoid printing out number of rows/vertices/rays found during computation.
 # CFLAGS += -DDEBUG
-# DFLAG = -g
+DFLAG = -g
 
 
 # Linker flags, do not modify!
@@ -33,6 +33,7 @@ endif
 INSTALLDIR = /home/worc4021/MATLAB/
 
 OBJECTS = mainFunctions.o translation_functions.o lrslib.o lrsgmp.o
+TESTOBJECTS = testcase.o translation_functions.o lrslib.o lrsgmp.o
 
 
 all: libgeocalc.$(EXTENTION)
@@ -49,3 +50,9 @@ libgeocalc.$(EXTENTION): $(OBJECTS)
 
 clean:
 	rm -f *.o *.$(EXTENTION)
+
+testcase: CFLAGS += -DNOMATLAB -DDEBUG
+
+testcase: $(TESTOBJECTS)
+	$(CC) -lgmp $(DFLAG) $^ -o testcase
+
