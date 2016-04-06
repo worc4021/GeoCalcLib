@@ -39,9 +39,3 @@ add
 
 Notice, that if you have not loaded the library Matlab will not allow you to quit,
 since it tries to unload the library by calling finish.m
-
-
-To run the testfile use:
-
-	make testcase
-	./testcase
