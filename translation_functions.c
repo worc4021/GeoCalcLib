@@ -327,8 +327,8 @@ struct GMPmat *V2H(struct GMPmat *inp)
     Q->m = GMPmat_Rows(inp);
     Q->n = GMPmat_Cols(inp);
     Q->hull = TRUE;
-    Q->polytope = TRUE;
-    Q->homogeneous = TRUE;
+    // Q->polytope = TRUE;
+    // Q->homogeneous = TRUE;
 
     output = lrs_alloc_mp_vector (Q->n);
 

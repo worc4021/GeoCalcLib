@@ -57,7 +57,7 @@ int main(int argc, char const *argv[])
 		GMPmat_setValue(Vertices,i,2,cos(t)+offset[1]);
 	}
 
-	// GMPmat_print(Vertices);
+	GMPmat_print(Vertices);
 	fprintf(stdout,"Initial Vertices:\n");
 	GMPmat_printAsDouble(Vertices);
 

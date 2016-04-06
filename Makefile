@@ -1,10 +1,10 @@
 UNAME_S := $(shell uname -s)
 
-MATLABROOT = /usr/local/MATLAB/R2014a
+MATLABROOT = /Applications/MATLAB_R2016a.app
 MATLABINCLUDEDIR = $(MATLABROOT)/extern/include/
 
 # Modify for your distribution:
-MATLABLIB = $(MATLABROOT)/bin/glnxa64/
+MATLABLIB = $(MATLABROOT)/bin/maci64/
 
 
 CFLAGS = -Wall -fpic
@@ -30,7 +30,7 @@ ifeq ($(UNAME_S),Linux)
 endif
 
 # Path to which everything should be installed, has to be on Matlab path!
-INSTALLDIR = /home/worc4021/MATLAB/
+INSTALLDIR = /Users/Manuel/Documents/MATLAB/Funktionen/
 
 OBJECTS = mainFunctions.o translation_functions.o lrslib.o lrsgmp.o
 TESTOBJECTS = testcase.o translation_functions.o lrslib.o lrsgmp.o
