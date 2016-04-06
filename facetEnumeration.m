@@ -15,8 +15,7 @@ else
     type = varargin{2};
 end
 
-y = sum(V,1)*1/(size(V,1));
-V = V - repmat(y,size(V,1),1);
+V = V;
 temp = calllib('libgeocalc','facetEnumeration',V,type);
 A = temp{1};
-b = temp{2}+A*y';
+b = temp{2};

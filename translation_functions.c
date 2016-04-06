@@ -506,7 +506,7 @@ struct GMPmat *reducevertices(struct GMPmat *inp)
     Q->m = m;
     Q->n = GMPmat_Cols(inp);
     Q->hull = TRUE;
-    Q->polytope = TRUE;
+    // Q->polytope = TRUE;
 
     output = lrs_alloc_mp_vector (Q->n);
 
@@ -754,6 +754,119 @@ void GMPmat_invertSignForFacetEnumeration(struct GMPmat *A)
   mpq_clear(holder);
 }
 
+struct GMPmat *GMPmat_lift(struct GMPmat *A)
+{
+  assert ( A != NULL );
+  size_t m,n, i, j;
+  m = GMPmat_Rows(A);
+  n = GMPmat_Cols(A) + 1;
+  struct GMPmat *retVal;
+  retVal = GMPmat_create(m, n, 0);
+  mpq_t curVal;
+  mpq_init(curVal);
+
+  for (i = 0; i < m; i++)
+  {
+    mpq_init(retVal->data[i*n]);
+    mpq_canonicalize(retVal->data[i*n]);
+    for (j = 1; j < n; j++)
+    {
+      GMPmat_getValue(curVal, A, i, j-1);
+      mpq_canonicalize(curVal);
+      mpq_init(retVal->data[i*n + j]);
+      mpq_set(retVal->data[i*n + j],curVal);
+    }
+  }
+  GMPmat_destroy(A);
+  return retVal;
+}
+
+struct GMPmat *GMPmat_unlift(struct GMPmat *A)
+{
+  assert ( A != NULL );
+  size_t m, n, i, curRow;
+  m = GMPmat_Rows(A);
+  n = GMPmat_Cols(A) - 1;
+  struct GMPmat *retVal;
+  retVal = GMPmat_create(GMPmat_count_zeros(A), n, 1);
+  curRow = 0;
+  mpq_t curVal, zero;
+  mpq_init(curVal);
+  mpq_init(zero);
+  mpq_canonicalize(zero);
+  mpq_t *currentRow;
+  currentRow = malloc(A->m*sizeof(*currentRow));
+
+  for (i = 0; i < m; i++)
+  {
+    if (mpq_equal(A->data[i*A->n],zero))
+      {
+        currentRow = mpq_row_extract(A, i);
+        currentRow = mpq_normalised_row(currentRow, GMPmat_Cols(A));
+        GMPmat_setRow(retVal, currentRow, curRow);
+        curRow += 1;
+      }
+  }
+  mpq_clear(curVal);
+  mpq_clear(zero);
+  GMPmat_destroy(A);
+  return retVal;
+
+}
+
+void GMPmat_setRow(const struct GMPmat *A, const mpq_t *row, size_t r)
+{
+  assert ( A != NULL && row != NULL );
+  size_t i;
+  for (i = 0; i < GMPmat_Cols(A); i++)
+  {
+    mpq_set(A->data[r*A->n+i],row[i]);
+  }
+}
+
+size_t GMPmat_count_zeros(const struct GMPmat *A)
+{
+  assert( A != NULL );
+  size_t i, retVal = 0;
+  mpq_t curVal;
+  mpq_init(curVal);
+  for (i = 0; i < GMPmat_Rows(A); i++)
+    {
+      GMPmat_getValue(curVal, A, i, 0);
+      if (mpq_sgn(curVal) == 0)
+        retVal += 1;
+    }
+  return retVal;
+  mpq_clear(curVal);
+}
+
+struct GMPmat *GMPmat_appendRow(struct GMPmat *A, mpq_t *row)
+{
+    assert( A != NULL && row != NULL );
+    struct GMPmat *retVal;
+    size_t m,n, i, j;
+    m = GMPmat_Rows(A) + 1;
+    n = GMPmat_Cols(A);
+    retVal = GMPmat_create( m, n, 0);
+    assert( m != 0 );
+
+    for (i = 0; i < (m-1); ++i)
+    {
+        for (j = 0; j < n; ++j)
+        {
+            mpq_init(retVal->data[i*n + j]);
+            mpq_set(retVal->data[i*n + j],A->data[i*n + j]);
+        }
+    }
+    for (i = 0; i < n; ++i)
+    {
+        mpq_init(retVal->data[(m-1)*n + i]);
+        mpq_set(retVal->data[(m-1)*n + i], row[i]);
+    }
+    GMPmat_destroy(A);
+    return retVal;
+}
+
 void mpz_row_clean(mpz_t *row, size_t m)
 {
     assert(row != NULL);
@@ -808,33 +921,6 @@ void mpz_norm(mpz_t norm, mpz_t *row, size_t m)
     }
     mpz_sqrt(norm, help);
     mpz_clear(help);
-}
-
-struct GMPmat *GMPmat_appendRow(struct GMPmat *A, mpq_t *row)
-{
-    assert( A != NULL && row != NULL );
-    struct GMPmat *retVal;
-    size_t m,n, i, j;
-    m = GMPmat_Rows(A) + 1;
-    n = GMPmat_Cols(A);
-    retVal = GMPmat_create( m, n, 0);
-    assert( m != 0 );
-
-    for (i = 0; i < (m-1); ++i)
-    {
-        for (j = 0; j < n; ++j)
-        {
-            mpq_init(retVal->data[i*n + j]);
-            mpq_set(retVal->data[i*n + j],A->data[i*n + j]);
-        }
-    }
-    for (i = 0; i < n; ++i)
-    {
-        mpq_init(retVal->data[(m-1)*n + i]);
-        mpq_set(retVal->data[(m-1)*n + i], row[i]);
-    }
-    GMPmat_destroy(A);
-    return retVal;
 }
 
 void mpz_to_mpq(mpq_t *rop, mpz_t *op, size_t m)
@@ -932,6 +1018,42 @@ void mpz_print_product(mpz_t numA, mpz_t denA, mpz_t numB, mpz_t denB)
 }
 #endif /* DEBUG */
 
+mpq_t *mpq_normalised_row(mpq_t *row, size_t m)
+{
+  assert ( row != NULL );
+  mpq_t zero;
+  mpq_init(zero);
+  assert( mpq_equal(row[0],zero) );
+  size_t i;
+  mpq_t *retVal, norm, curVal, Mi;
+  retVal = malloc( sizeof(*retVal)*(m-1) );
+  assert(retVal != NULL );
+  mpq_init(norm);
+  mpq_init(curVal);
+  mpq_init(Mi);
+  mpq_set_ui(Mi, 1L , m-1);
+
+  for (i = 1; i < m; i++)
+  {
+    mpq_abs(curVal,row[i]);
+    mpq_add(norm,norm,curVal);
+  }
+  mpq_mul(norm, norm, Mi);
+  mpq_canonicalize(norm);
+
+  for (i = 0; i < m-1; i++)
+  {
+    mpq_init(retVal[i]);
+    mpq_div(retVal[i],row[i+1],Mi);
+    mpq_canonicalize(retVal[i]);
+  }
+  return retVal;
+  mpq_row_clean(row, m);
+  mpq_clear(norm);
+  mpq_clear(curVal);
+  mpq_clear(Mi);
+
+}
 
 mpq_t *mpq_row_extract(const struct GMPmat *A, size_t r)
 {

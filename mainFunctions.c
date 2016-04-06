@@ -79,7 +79,9 @@ mxArray *facetEnumeration(const mxArray *V, const mxArray *type)
 	mxDestroyArray(helper);
 
 	myHelp = reducevertices(myHelp);
-	myHelp = V2H(myHelp);
+	myHelp = GMPmat_lift(myHelp);
+	myHelp = H2V(myHelp);
+	myHelp = GMPmat_unlift(myHelp);
 	if (!myHelp->empty) {
 
 		myHelp = reducemat(myHelp);

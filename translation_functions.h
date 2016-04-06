@@ -60,6 +60,10 @@ struct GMPmat *reducevertices(struct GMPmat *inp);
 
 /* Functions to work with GMPmat structures */
 
+struct GMPmat *GMPmat_lift(struct GMPmat *A);
+struct GMPmat *GMPmat_unlift(struct GMPmat *A);
+size_t GMPmat_count_zeros(const struct GMPmat *A);
+
 #ifdef DEBUG
 void GMPmat_print(const struct GMPmat *A);
 void GMPmat_printRow(const struct GMPmat *A, size_t r);
@@ -76,6 +80,7 @@ void GMPmat_validate_indices (const struct GMPmat *A, size_t r, size_t c);
 struct GMPmat *GMPmat_dropCols(struct GMPmat *A, size_t d);
 void GMPmat_everyNrows(struct GMPmat *A, size_t N, char *type);
 void GMPmat_invertSignForFacetEnumeration(struct GMPmat *A);
+void GMPmat_setRow(const struct GMPmat *A, const mpq_t *row, size_t r);
 
 /* Functions to work with GMP data types */
 
@@ -96,5 +101,6 @@ void mpz_print(mpz_t op);
 void mpz_print_product(mpz_t numA, mpz_t denA, mpz_t numB, mpz_t denB);
 #endif /* DEBUG */
 
+mpq_t *mpq_normalised_row(mpq_t *row, size_t m);
 mpq_t *mpq_row_extract(const struct GMPmat *A, size_t r);
 void lprint(long *array, size_t l);
