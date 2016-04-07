@@ -49,7 +49,7 @@ libgeocalc.$(EXTENTION): $(OBJECTS)
 	$(CC) $(DFLAG) $(CFLAGS) -I$(MATLABINCLUDEDIR) $< -o $@ -c
 
 clean:
-	rm -f *.o *.$(EXTENTION)
+	rm -f *.o *.$(EXTENTION) testcase
 
 testcase: CFLAGS += -DNOMATLAB -DDEBUG
 
