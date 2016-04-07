@@ -78,10 +78,13 @@ int main(int argc, char const *argv[])
 
 	/* Calculating the facet enumeration using analogue procedures as those in chdemo.c */
 	Vertices = V2H(Vertices);
-	GMPmat_invertSignForFacetEnumeration(Vertices);
 
-	fprintf(stdout,"Facet description:\n");
-	GMPmat_printAsDouble(Vertices);
+	fprintf(stdout, "Output of lrs\n");
+	GMPmat_print(Vertices);
+	
+	GMPmat_invertSignForFacetEnumeration(Vertices);
+	// fprintf(stdout,"Facet description:\n");
+	// GMPmat_printAsDouble(Vertices);
 
 	/* Reducing redundant inequalities using analogue procedures as those in redund_main in lrslib.c */
 	Vertices = reducemat(Vertices);
