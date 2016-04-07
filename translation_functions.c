@@ -415,9 +415,9 @@ struct GMPmat *reducemat(struct GMPmat *inp)
 
     size_t m = GMPmat_Rows(inp);
 
-    size_t *redRows;
-    redRows = malloc( m*sizeof(*redRows) );
-    assert( redRows != NULL );
+    // size_t *redRows;
+    // redRows = malloc( m*sizeof(*redRows) );
+    // assert( redRows != NULL );
 
     assert( my_lrs_init () == TRUE );
 
@@ -939,6 +939,19 @@ void mpz_to_mpq(mpq_t *rop, mpz_t *op, size_t m)
             mpq_canonicalize(rop[i]);
         }
         mpz_clear(norm);
+    }else if (mpz_sgn(op[0]) == -1)
+    {
+      mpz_t helper;
+      mpz_init(helper);
+      mpz_neg(helper, op[0]);
+      for (i = 0; i < m; ++i)
+        {
+            mpq_set_num(rop[i], op[i]);
+            mpq_set_den(rop[i], helper);
+            mpq_canonicalize(rop[i]);
+        }
+      mpz_clear(helper);
+
     }else{
         for (i = 0; i < m; ++i)
         {
