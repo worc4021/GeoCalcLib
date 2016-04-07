@@ -57,71 +57,74 @@ int main(int argc, char const *argv[])
 		GMPmat_setValue(Vertices,i,2,cos(t)+offset[1]);
 	}
 
-	// GMPmat_print(Vertices);
-	Vertices = GMPmat_lift(Vertices);
-	// GMPmat_print(Vertices);
-	Vertices = H2V(Vertices);
 	GMPmat_print(Vertices);
-	Vertices = GMPmat_unlift(Vertices);
-	GMPmat_printAsDouble(Vertices);
+	// Vertices = GMPmat_lift(Vertices);
+	// GMPmat_print(Vertices);
+	// Vertices = H2V(Vertices);
+	// GMPmat_print(Vertices);
+	// Vertices = GMPmat_unlift(Vertices);
+	// GMPmat_printAsDouble(Vertices);
 	// fprintf(stdout,"Initial Vertices:\n");
 	// GMPmat_printAsDouble(Vertices);
 
+	// Vertices = V2H(Vertices);
+	// GMPmat_printAsDouble(Vertices);
+
 	// /* Reducing (non-existent) redundant vertices using the LRS checkindex function */
-	// Vertices = reducevertices(Vertices);
+	Vertices = reducevertices(Vertices);
 
-	// fprintf(stdout,"Reduced Vertices:\n");
-	// GMPmat_printAsDouble(Vertices);
+	fprintf(stdout,"Reduced Vertices:\n");
+	GMPmat_printAsDouble(Vertices);
 
-	// /* Calculating the facet enumeration using analogue procedures as those in chdemo.c */
-	// Vertices = V2H(Vertices);
-	// GMPmat_invertSignForFacetEnumeration(Vertices);
+	/* Calculating the facet enumeration using analogue procedures as those in chdemo.c */
+	Vertices = V2H(Vertices);
+	GMPmat_invertSignForFacetEnumeration(Vertices);
 
-	// fprintf(stdout,"Facet description:\n");
-	// GMPmat_printAsDouble(Vertices);
+	fprintf(stdout,"Facet description:\n");
+	GMPmat_printAsDouble(Vertices);
 
-	// /* Reducing redundant inequalities using analogue procedures as those in redund_main in lrslib.c */
-	// Vertices = reducemat(Vertices);
-	// fprintf(stdout,"Reduced H-representation:\n");
-	// GMPmat_printAsDouble(Vertices);
+	/* Reducing redundant inequalities using analogue procedures as those in redund_main in lrslib.c */
+	Vertices = reducemat(Vertices);
+	fprintf(stdout,"Reduced H-representation:\n");
+	GMPmat_printAsDouble(Vertices);
 
-	// GMPmat_destroy(Vertices);
+	GMPmat_destroy(Vertices);
 
-	// /* Same all over again using no offset to verify that the function calls are correct otherwise */
-	// Vertices = GMPmat_create(N,3,1);
+	/* Same all over again using no offset to verify that the function calls are correct otherwise */
+	Vertices = GMPmat_create(N,3,1);
 
-	// for (i = 0; i < N; ++i)
-	// {
-	// 	t = ((double)i/(double)N)*2.*M_PI;
-	// 	GMPmat_setValue(Vertices,i,0,1.);
-	// 	GMPmat_setValue(Vertices,i,1,sin(t));
-	// 	GMPmat_setValue(Vertices,i,2,cos(t));
-	// }
+	for (i = 0; i < N; ++i)
+	{
+		t = ((double)i/(double)N)*2.*M_PI;
+		GMPmat_setValue(Vertices,i,0,1.);
+		GMPmat_setValue(Vertices,i,1,sin(t));
+		GMPmat_setValue(Vertices,i,2,cos(t));
+	}
 
-	// fprintf(stdout,"Vertices without offset:\n");
-	// GMPmat_printAsDouble(Vertices);
+	fprintf(stdout,"Vertices without offset:\n");
+	GMPmat_printAsDouble(Vertices);
 	
-	// Vertices = V2H(Vertices);
-	// GMPmat_invertSignForFacetEnumeration(Vertices);
+	Vertices = V2H(Vertices);
+	GMPmat_invertSignForFacetEnumeration(Vertices);
 
-	// fprintf(stdout,"H-representation for unshifted Vertices:\n");
-	// GMPmat_printAsDouble(Vertices);
+	fprintf(stdout,"H-representation for unshifted Vertices:\n");
+	GMPmat_printAsDouble(Vertices);
 
-	// Vertices = reducemat(Vertices);
-	// fprintf(stdout,"Reduced H-representation:\n");
-	// GMPmat_printAsDouble(Vertices);
+	Vertices = reducemat(Vertices);
+	fprintf(stdout,"Reduced H-representation:\n");
+	GMPmat_printAsDouble(Vertices);
 
-	// GMPmat_shiftHRep(Vertices,Offset);
+	GMPmat_shiftHRep(Vertices,Offset);
 	
-	// fprintf(stdout, "(b-A*offset,-A) \n");
-	// GMPmat_printAsDouble(Vertices);
+	fprintf(stdout, "(b-A*offset,-A) \n");
+	GMPmat_printAsDouble(Vertices);
 
-	// Vertices = H2V(Vertices);
-	// fprintf(stdout, "Vertex enumeration again:\n");
-	// GMPmat_printAsDouble(Vertices);	
+	Vertices = H2V(Vertices);
+	fprintf(stdout, "Vertex enumeration again:\n");
+	GMPmat_printAsDouble(Vertices);	
 
-	// GMPmat_destroy(Vertices);
-	// GMPmat_destroy(Offset);
+	GMPmat_destroy(Vertices);
+	GMPmat_destroy(Offset);
 	return 0;
 }
 
