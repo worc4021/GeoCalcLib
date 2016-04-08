@@ -3,5 +3,6 @@
 *.o
 *.mexmaci64
 *.dylib
+*.so
 Makefile
 User.make
