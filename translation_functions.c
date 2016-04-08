@@ -327,8 +327,6 @@ struct GMPmat *V2H(struct GMPmat *inp)
     Q->m = GMPmat_Rows(inp);
     Q->n = GMPmat_Cols(inp);
     Q->hull = TRUE;
-    // Q->polytope = TRUE;
-    // Q->homogeneous = TRUE;
 
     output = lrs_alloc_mp_vector (Q->n);
 
@@ -351,10 +349,6 @@ struct GMPmat *V2H(struct GMPmat *inp)
     for (i = 1; i <= GMPmat_Rows(inp); ++i)
     {
       GMPmat_getRow(num, den, inp, i-1);
-      if ( zero(num[0]) ) {
-          Q->polytope = FALSE;
-          Q->homogeneous = FALSE;
-        }
       lrs_set_row_mp(P ,Q ,i ,num ,den , GE);
     }
 
@@ -414,10 +408,6 @@ struct GMPmat *reducemat(struct GMPmat *inp)
     long i;
 
     size_t m = GMPmat_Rows(inp);
-
-    // size_t *redRows;
-    // redRows = malloc( m*sizeof(*redRows) );
-    // assert( redRows != NULL );
 
     assert( my_lrs_init () == TRUE );
 
@@ -506,7 +496,6 @@ struct GMPmat *reducevertices(struct GMPmat *inp)
     Q->m = m;
     Q->n = GMPmat_Cols(inp);
     Q->hull = TRUE;
-    // Q->polytope = TRUE;
 
     output = lrs_alloc_mp_vector (Q->n);
 

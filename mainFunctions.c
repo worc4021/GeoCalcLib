@@ -78,13 +78,14 @@ mxArray *facetEnumeration(const mxArray *V, const mxArray *type)
 
 	mxDestroyArray(helper);
 
+	myHelp = V2H(myHelp);
+	/* Alternative without using the LRS facet enumeration explicitly
 	myHelp = reducevertices(myHelp);
 	myHelp = GMPmat_lift(myHelp);
 	myHelp = H2V(myHelp);
-	myHelp = GMPmat_unlift(myHelp);
+	myHelp = GMPmat_unlift(myHelp); */
 	if (!myHelp->empty) {
 
-		myHelp = reducemat(myHelp);
 		GMPmat_invertSignForFacetEnumeration(myHelp);
 
 		helper = MXArray_fromGMPmat(myHelp);
@@ -200,7 +201,6 @@ mxArray *projection(const mxArray *A, const mxArray *b, const mxArray *dim)
 			
 			if (!myHelp->empty) 
 			{
-				myHelp = reducemat(myHelp);
 				GMPmat_invertSignForFacetEnumeration(myHelp);
 				helper = MXArray_fromGMPmat(myHelp);
 				GMPmat_destroy(myHelp);

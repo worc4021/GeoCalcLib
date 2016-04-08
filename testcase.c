@@ -57,15 +57,15 @@ int main(int argc, char const *argv[])
 		GMPmat_setValue(Vertices,i,2,cos(t)+offset[1]);
 	}
 
-	GMPmat_print(Vertices);
+	// GMPmat_print(Vertices);
 	// Vertices = GMPmat_lift(Vertices);
 	// GMPmat_print(Vertices);
 	// Vertices = H2V(Vertices);
 	// GMPmat_print(Vertices);
 	// Vertices = GMPmat_unlift(Vertices);
 	// GMPmat_printAsDouble(Vertices);
-	// fprintf(stdout,"Initial Vertices:\n");
-	// GMPmat_printAsDouble(Vertices);
+	fprintf(stdout,"Initial Vertices:\n");
+	GMPmat_printAsDouble(Vertices);
 
 	// Vertices = V2H(Vertices);
 	// GMPmat_printAsDouble(Vertices);
@@ -79,17 +79,22 @@ int main(int argc, char const *argv[])
 	/* Calculating the facet enumeration using analogue procedures as those in chdemo.c */
 	Vertices = V2H(Vertices);
 
-	fprintf(stdout, "Output of lrs\n");
-	GMPmat_print(Vertices);
+	// fprintf(stdout, "Output of lrs\n");
+	// GMPmat_print(Vertices);
 	
-	GMPmat_invertSignForFacetEnumeration(Vertices);
+	// GMPmat_invertSignForFacetEnumeration(Vertices);
 	// fprintf(stdout,"Facet description:\n");
 	// GMPmat_printAsDouble(Vertices);
 
 	/* Reducing redundant inequalities using analogue procedures as those in redund_main in lrslib.c */
 	Vertices = reducemat(Vertices);
-	fprintf(stdout,"Reduced H-representation:\n");
+	// fprintf(stdout,"Reduced H-representation:\n");
+	// GMPmat_printAsDouble(Vertices);
+
+	Vertices = H2V(Vertices);
+	fprintf(stdout,"The associated vertices again:\n");
 	GMPmat_printAsDouble(Vertices);
+
 
 	GMPmat_destroy(Vertices);
 
