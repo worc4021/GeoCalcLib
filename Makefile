@@ -33,7 +33,7 @@ OBJECTS = mainFunctions.o translation_functions.o lrslib.o lrsgmp.o
 
 
 all: libgeocalc.$(EXTENTION)
-	mv libgeocalc.$(EXTENTION) $(INSTALLDIR)libgeocalc.$(EXTENTION)
+	mv libgeocalc.$(EXTENTION) $(INSTALLDIR)/libgeocalc.$(EXTENTION)
 	cp *.m $(INSTALLDIR)
 	rm *.o
 
