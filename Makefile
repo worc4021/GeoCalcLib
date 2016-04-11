@@ -26,7 +26,7 @@ endif
 ifeq ($(UNAME_S),Linux)
 	LFLAGS += -Wl,-rpath,$(MATLABLIB)
 	EXTENTION = so
-	MATLABLIB = $(MATLABROOT)/bin/linux64a/
+	MATLABLIB = $(MATLABROOT)/bin/glnxa64/
 endif
 
 OBJECTS = mainFunctions.o translation_functions.o lrslib.o lrsgmp.o
