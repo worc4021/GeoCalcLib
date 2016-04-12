@@ -17,7 +17,7 @@ expectedReps = {'V','H'};
 
 
 addOptional(p,'Rep','V',@(x) any(validatestring(x,expectedReps)) );
-addOptional(p,'fname','lrstest.ine',@(x) validateattributes(x,{'char'},{'noempty'}) );
+addOptional(p,'fname','lrstest.ine',@(x) validateattributes(x,{'char'},{'nonempty'}) );
 addOptional(p,'V',zeros(0,1),@(x) validateattributes(x,{'numeric'},{'nonempty'}));
 addOptional(p,'A',zeros(0,1),@(x) validateattributes(x,{'numeric'},{'nonempty'}));
 addOptional(p,'Type',ones(0,1) ,@(x) validateattributes(x,{'numeric'},{'nonempty','ncols',1}));
