@@ -1278,17 +1278,28 @@ mxArray *directCallWrapper(const mxArray *data)
   {
     /* Validate that vertices or rays were passed */
     curField = extractField(data, "V");
+    mxArray *internalMXData;
+    internalMXData = MXArray_constantVector( 0 , 0.);
     if (curField == NULL){      
       curField = extractField(data, "R");
       if (curField == NULL )
         mexErrMsgTxt("No vertices or rays passed.\n");
+      else {
+        if (!mxIsDouble(curField) || mxIsComplex(curField))
+          mexErrMsgTxt("All data must be real and numeric.\n");
+        mxArray *typeVec;
+        typeVec = MXArray_constantVector(mxGetM(curField), 0.);
+        mxDestroyArray(internalMXData);
+        internalMXData = VertConcat(typeVec, curField);
+        mxDestroyArray(typeVec);
+      }
     } else {
       /* Extract Vertices */
       if (!mxIsDouble(curField) || mxIsComplex(curField))
         mexErrMsgTxt("All data must be real and numeric.\n");
       mxArray *typeVec;
       typeVec = MXArray_constantVector(mxGetM(curField), 1.);
-      mxArray *internalMXData;
+      mxDestroyArray(internalMXData);
       internalMXData = VertConcat(typeVec, curField);
       mxDestroyArray(typeVec);
       curField = extractField(data, "R");
@@ -1309,6 +1320,7 @@ mxArray *directCallWrapper(const mxArray *data)
         }
 
       }
+    }
       /* internalMXData now holds all vertices and rays in a LRS friendly arrangement */
       struct GMPmat *internalMPData;
       internalMPData = GMPmat_fromMXArray(internalMXData);
@@ -1405,7 +1417,7 @@ mxArray *directCallWrapper(const mxArray *data)
       mxDestroyArray(retVal);
       retVal = MXArray_fromGMPmat(retMat);
       GMPmat_destroy(retMat);
-    }
+    
 
   }
   else if (representation[0] == 'H') /* -------------------------------- */
