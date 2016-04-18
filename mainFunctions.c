@@ -232,3 +232,11 @@ mxArray *projection(const mxArray *A, const mxArray *b, const mxArray *dim)
 	return retVal;
 
 }
+
+
+mxArray *lrsCall(const mxArray *dat)
+{
+	mxArray *retVal;
+	retVal = directCallWrapper(dat);
+	return retVal;
+}

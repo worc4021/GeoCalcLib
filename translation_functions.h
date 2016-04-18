@@ -40,13 +40,14 @@ struct GMPmat{
 
 
 /* Interface between mxArray and GMPmat structures */
-
+mxArray *MXArray_constantVector(size_t rows, double c);
 struct GMPmat *GMPmat_fromMXArray (const mxArray *pm);
 mxArray *MXArray_fromGMPmat(const struct GMPmat *A);
 size_t MXArray_to_integer(const mxArray *pm);
 mxArray *VertConcat(const mxArray *A, const mxArray *b);
 mxArray *VertBreakdown(const mxArray *res);
 mxArray *createEmptyCell( );
+mxArray *MXArray_stack(mxArray *A, mxArray *B);
 
 #endif /* NOMATLAB */
 
@@ -81,6 +82,7 @@ struct GMPmat *GMPmat_dropCols(struct GMPmat *A, size_t d);
 void GMPmat_everyNrows(struct GMPmat *A, size_t N, char *type);
 void GMPmat_invertSignForFacetEnumeration(struct GMPmat *A);
 void GMPmat_setRow(const struct GMPmat *A, const mpq_t *row, size_t r);
+struct GMPmat *GMPmat_stackVert(struct GMPmat *A, struct GMPmat *B);
 
 /* Functions to work with GMP data types */
 
@@ -104,3 +106,7 @@ void mpz_print_product(mpz_t numA, mpz_t denA, mpz_t numB, mpz_t denB);
 mpq_t *mpq_normalised_row(mpq_t *row, size_t m);
 mpq_t *mpq_row_extract(const struct GMPmat *A, size_t r);
 void lprint(long *array, size_t l);
+
+#ifdef DIRECT
+mxArray *directCallWrapper(const mxArray *data);
+#endif /* DIRECT */

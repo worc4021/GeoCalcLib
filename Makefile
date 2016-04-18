@@ -6,7 +6,7 @@ MATLABINCLUDEDIR = $(MATLABROOT)/extern/include/
 
 
 CFLAGS = -Wall -fpic
-CFLAGS += -DGMP -DTIMES -DSIGNALS -DB64 -DLRS_QUIET -DNOINFO
+CFLAGS += -DGMP -DTIMES -DSIGNALS -DB64 -DLRS_QUIET -DNOINFO -DDIRECT
 
 
 # Set DEBUG macro for functions to print GMPmat and mpx_t type data in debugger, 

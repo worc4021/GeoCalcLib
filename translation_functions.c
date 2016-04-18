@@ -29,6 +29,7 @@
 #include <string.h>
 #include "lrslib.h"
 
+
 #ifndef NOMATLAB
 #include "tmwtypes.h"
 #endif
@@ -57,6 +58,18 @@ static void timecheck ();
 static void lrs_dump_state () {};
 
 #ifndef NOMATLAB
+
+mxArray *MXArray_constantVector(size_t rows, double c)
+{
+  size_t i;
+  mxArray *retVal;
+  double *ptr;
+  retVal = mxCreateNumericMatrix(rows, 1, OUTPUT_PRECISION, mxREAL);
+  ptr = mxGetPr(retVal);
+  for (i = 0; i < rows; i++)
+    ptr[i] = c;
+  return retVal;
+}
 
 struct GMPmat *GMPmat_fromMXArray (const mxArray *pm)
 {
@@ -208,6 +221,34 @@ mxArray *createEmptyCell( )
   return retVal;
 
 }
+
+mxArray *MXArray_stack(mxArray *A,mxArray *B)
+{
+  assert(A != NULL && B != NULL );
+  assert( mxGetN(A) == mxGetN(B) );
+  
+  size_t i, mA, mB, n;
+  n = mxGetN(A);
+  mA = mxGetM(A);
+  mB = mxGetM(B);
+
+  mxArray *retVal;
+  retVal = mxCreateNumericMatrix(mA + mB , n, mxDOUBLE_CLASS, mxREAL);
+  double *ptr, *pA, *pB;
+  ptr = mxGetPr(retVal);
+  pA = mxGetPr(A);
+  pB = mxGetPr(B);
+
+  for (i = 0; i < n; i++)
+  {
+    memcpy(ptr +i*(mA+mB), pA + i*mA, mA*sizeof(*ptr) );
+    memcpy(ptr + i*(mA+mB)+ mA, pB + i*mB, mB*sizeof(*ptr) );
+  }
+  mxDestroyArray(B);
+  mxDestroyArray(A);
+  return retVal;
+}
+
 #endif /* NOMATLAB */
 
 int my_lrs_init()
@@ -856,6 +897,38 @@ struct GMPmat *GMPmat_appendRow(struct GMPmat *A, mpq_t *row)
     return retVal;
 }
 
+struct GMPmat *GMPmat_stackVert(struct GMPmat *A, struct GMPmat *B)
+{
+  assert ( A != NULL && B != NULL );
+  assert ( A->n == B->n );
+  struct GMPmat *retVal;
+  retVal = GMPmat_create(A->m + B->m, A->n, 0);
+  size_t i,j, n = A->n;
+  
+  for (i = 0; i<A->m ; i++)
+  {
+    for (j = 0; j < A->n ; j++)
+    {
+      mpq_init(retVal->data[i*n + j]);
+      mpq_set(retVal->data[i*n + j],A->data[i*n + j]);
+    }
+  }
+
+  for (i = 0; i< B->m ; i++)
+  {
+    for (j = 0; i < n; j++)
+    {
+      mpq_init(retVal->data[(A->m-1)*n+i*n +j]);
+      mpq_set(retVal->data[(A->m-1)*n+i*n +j],B->data[i*n + j]);
+    }
+  }
+  GMPmat_destroy(B);
+  GMPmat_destroy(A);
+  return retVal;
+}
+
+
+
 void mpz_row_clean(mpz_t *row, size_t m)
 {
     assert(row != NULL);
@@ -1126,3 +1199,396 @@ die_gracefully ()
 }
 
 #endif
+
+#ifdef DIRECT
+
+mxArray *extractField(const mxArray *inp, char *fname)
+{
+  mxArray *retVal;
+  retVal = mxGetField( inp , 0 , fname );
+  return retVal;
+}
+
+mxArray *directCallWrapper(const mxArray *data)
+{
+  if (data == NULL)
+    mexErrMsgTxt("No data passed.\n");
+  
+  if ( !mxIsStruct(data) )
+    mexErrMsgTxt("Data must be passed as struct.\n");
+
+  /* Validating representation */
+  mxArray *curField;
+  curField = extractField(data, "rep");
+  if ( curField == NULL)
+    mexErrMsgTxt("Field 'rep' must be passed.\n");
+  if ( !mxIsChar(curField) )
+    mexErrMsgTxt("Field 'rep' must be 'V' or 'H'.\n");
+  if (((mxGetM(curField) * mxGetN(curField)) + 1) != 2)
+    mexErrMsgTxt("Field 'rep' must be 'V' or 'H'.\n");
+
+  /* Extract string for representation */
+  char representation[2];
+  mxGetString(curField, representation, 2);
+
+  if (representation[0] != 'V' && representation[0] != 'H')
+    mexErrMsgTxt("Field 'rep' must be 'V' or 'H'.\n");
+
+  mxArray *retVal;
+  retVal = mxCreateNumericMatrix(0,1,mxDOUBLE_CLASS,mxREAL);
+
+
+  long maxdepth = 0L;
+  curField = extractField(data, "maxdepth");
+  if ( curField != NULL ){
+    if (!mxIsScalar(curField) || !mxIsDouble(curField) || mxIsComplex(curField))
+      mexErrMsgTxt("'maxdepth' must be a non-negative real number.\n");
+    
+    maxdepth = (long)mxGetScalar(curField);
+
+    if (maxdepth< 1L)
+      mexErrMsgTxt("'maxdepth' must be a non-negative real number.\n");
+  }
+
+  long maxoutput = 0L;
+  curField = extractField(data, "maxoutput");
+  if ( curField != NULL ){
+    if (!mxIsScalar(curField) || !mxIsDouble(curField) || mxIsComplex(curField))
+      mexErrMsgTxt("'maxoutput' must be a non-negative real number.\n");
+    
+    maxoutput = (long)mxGetScalar(curField);
+
+    if (maxoutput< 1L)
+      mexErrMsgTxt("'maxoutput' must be a non-negative real number.\n");
+  }
+
+  long maxcobases = 0L;
+  curField = extractField(data, "maxcobases");
+  if ( curField != NULL ){
+    if (!mxIsScalar(curField) || !mxIsDouble(curField) || mxIsComplex(curField))
+      mexErrMsgTxt("'maxcobases' must be a non-negative real number.\n");
+    
+    maxcobases = (long)mxGetScalar(curField);
+
+    if (maxcobases< 1L)
+      mexErrMsgTxt("'maxcobases' must be a non-negative real number.\n");
+  }
+
+  if (representation[0] == 'V') /* -------------------------------------- */
+  {
+    /* Validate that vertices or rays were passed */
+    curField = extractField(data, "V");
+    if (curField == NULL){
+      if (!mxIsDouble(curField) || mxIsComplex(curField))
+        mexErrMsgTxt("All data must be real and numeric.\n");
+      curField = extractField(data, "R");
+      if (curField == NULL )
+        mexErrMsgTxt("No vertices or rays passed.\n");
+    } else {
+      /* Extract Vertices */
+      mxArray *typeVec;
+      typeVec = MXArray_constantVector(mxGetM(curField), 1.);
+
+      mxArray *internalMXData;
+      internalMXData = VertConcat(typeVec, curField);
+      mxDestroyArray(typeVec);
+
+      curField = extractField(data, "R");
+      if (curField != NULL )
+      {
+        if (!mxIsDouble(curField) || mxIsComplex(curField))
+          mexErrMsgTxt("All data must be real and numeric.\n");
+
+        if (mxGetN(curField) != (mxGetN(internalMXData)-1) ){
+          mxDestroyArray(internalMXData);
+          mexErrMsgTxt("Vertices and rays need to be of the same dimension.\n");
+        } else {
+          typeVec = MXArray_constantVector(mxGetM(curField), 0.);
+          internalMXData = MXArray_stack(internalMXData, VertConcat(typeVec,curField) );
+          mxDestroyArray(typeVec);
+        }
+
+      }
+      /* internalMXData now holds all vertices and rays in a LRS friendly arrangement */
+      struct GMPmat *internalMPData;
+      internalMPData = GMPmat_fromMXArray(internalMXData);
+      mxDestroyArray(internalMXData);
+
+      /* ----------------------------- */
+
+    lrs_dic *P;
+    lrs_dat *Q;
+    lrs_mp_vector output;
+    lrs_mp_matrix Lin;
+
+    long i;
+    long col;
+
+    assert( my_lrs_init () == TRUE );
+
+    Q = lrs_alloc_dat ("LRS globals");
+    assert ( Q != NULL );
+    Q->m = GMPmat_Rows(internalMPData);
+    Q->n = GMPmat_Cols(internalMPData);
+    Q->hull = TRUE;
+
+    if (maxdepth)
+      Q->maxdepth = maxdepth;
+    if (maxoutput)
+      Q->maxoutput = maxoutput;
+    if (maxcobases)
+      Q->maxcobases = maxcobases;
+
+    output = lrs_alloc_mp_vector (Q->n);
+
+    lrs_mp_vector num, den;
+    num = lrs_alloc_mp_vector(GMPmat_Cols(internalMPData));
+    den = lrs_alloc_mp_vector(GMPmat_Cols(internalMPData));
+
+    P = lrs_alloc_dic (Q);
+    assert ( P != NULL );
+
+    struct GMPmat *retMat;
+    retMat = GMPmat_create(0, GMPmat_Cols(internalMPData), 1);
+      
+    mpq_t *curRow;
+    curRow = calloc(GMPmat_Cols(internalMPData), sizeof(mpq_t));
+    assert( curRow != NULL );
+    mpq_row_init(curRow, GMPmat_Cols(internalMPData));
+
+
+    for (i = 1; i <= GMPmat_Rows(internalMPData); ++i)
+    {
+      GMPmat_getRow(num, den, internalMPData, i-1);
+      lrs_set_row_mp(P ,Q ,i ,num ,den , GE);
+    }
+
+    if ( lrs_getfirstbasis (&P, Q, &Lin, TRUE) ){
+    
+    for (col = 0L; col < Q->nredundcol; col++)
+      lrs_printoutput (Q, Lin[col]);
+
+    do
+    {
+      for (col = 0; col <= P->d; col++)
+        if (lrs_getsolution (P, Q, output, col)){
+          mpz_to_mpq(curRow, output, GMPmat_Cols(retMat));
+          retMat = GMPmat_appendRow(retMat, curRow);
+          GMPmat_everyNrows(retMat, pN, "inequalities");
+        }
+    }
+    while (lrs_getnextbasis (&P, Q, FALSE));
+
+    mpq_row_clean( curRow, GMPmat_Cols(retMat) );
+    lrs_clear_mp_vector ( output, Q->n);
+    lrs_clear_mp_vector ( num, Q->n);
+    lrs_clear_mp_vector ( den, Q->n);
+    lrs_free_dic ( P , Q);
+    lrs_free_dat ( Q );
+
+    GMPmat_destroy(internalMPData);
+
+
+  } else {
+
+    printf("Empty set.\n");
+    retMat->empty = 1;
+    mpq_row_clean( curRow, GMPmat_Cols(retMat) );
+    lrs_clear_mp_vector ( output, Q->n);
+    lrs_clear_mp_vector ( num, Q->n);
+    lrs_clear_mp_vector ( den, Q->n);
+    lrs_free_dic ( P , Q);
+    lrs_free_dat ( Q );
+
+    GMPmat_destroy(internalMPData);
+
+  }
+
+    /* ----------------------------- */
+
+      GMPmat_invertSignForFacetEnumeration(retMat); /* result of LRS is still b+Ax>=0 */
+      mxDestroyArray(retVal);
+      retVal = MXArray_fromGMPmat(retMat);
+      GMPmat_destroy(retMat);
+    }
+
+  }
+  else if (representation[0] == 'H') /* -------------------------------- */
+  {
+    curField = extractField(data, "Aineq");
+    mxArray *rhs, *Aeq, *beq;
+    rhs = extractField(data, "bineq");
+    Aeq = extractField(data, "Aeq");
+    beq = extractField(data, "beq");
+    size_t m;
+
+    if (curField == NULL || rhs == NULL )
+      mexErrMsgTxt("Fields 'Aineq' and 'bineq' are required for H-representation.\n");
+
+    if (!mxIsDouble(curField) || mxIsComplex(curField) || !mxIsDouble(rhs) || mxIsComplex(rhs))
+        mexErrMsgTxt("All data must be real and numeric.\n");
+   
+    if (mxGetM(curField) != mxGetM(rhs))
+      mexErrMsgTxt("'Aineq' and 'bineq' must have the same number of rows.\n");
+
+    m = mxGetM(curField);
+
+    if (mxGetN(rhs) != 1)
+      mexErrMsgTxt("'bineq' must be vector.\n");
+
+    if (Aeq != NULL){
+      if (beq == NULL)
+        mexErrMsgTxt("'beq' must be provided.\n");
+      
+      if (!mxIsDouble(Aeq) || mxIsComplex(Aeq) || !mxIsDouble(beq) || mxIsComplex(beq))
+        mexErrMsgTxt("All data must be real and numeric.\n");
+
+      if (mxGetN(curField) != mxGetN(Aeq))
+        mexErrMsgTxt("'Aineq' and 'Aeq' must have the same number of columns.\n");
+      
+      if (mxGetM(Aeq) != mxGetM(beq))
+        mexErrMsgTxt("'Aeq' and 'beq' must have same number of rows.\n");
+      
+      if (mxGetN(beq) != 1)
+        mexErrMsgTxt("'beq' must be a vector.\n");
+
+      m += mxGetM(Aeq);
+    }
+
+
+    /*  Both Aineq and bineq are admissible. */
+
+    mxArray *internalMXData;
+
+    internalMXData = VertConcat(rhs,curField);
+
+    struct GMPmat *internalMPData;
+    internalMPData = GMPmat_fromMXArray(internalMXData);
+    mxDestroyArray(internalMXData);
+
+    GMPmat_invertSignForFacetEnumeration(internalMPData);
+
+    /* ------------------------- */
+
+    lrs_dic *P;
+    lrs_dat *Q;
+    lrs_mp_vector output;
+    lrs_mp_matrix Lin;
+
+      size_t i;
+      long col;
+
+      assert( my_lrs_init () == TRUE );
+
+      Q = lrs_alloc_dat ("LRS globals");
+      assert( Q!= NULL );
+
+      Q->m = m;
+      Q->n = GMPmat_Cols(internalMPData);
+      
+
+      if (maxdepth)
+        Q->maxdepth = maxdepth;
+      if (maxoutput)
+        Q->maxoutput = maxoutput;
+      if (maxcobases)
+        Q->maxcobases = maxcobases;
+
+
+      output = lrs_alloc_mp_vector (Q->n);
+
+      lrs_mp_vector num, den;
+      num = lrs_alloc_mp_vector(GMPmat_Cols(internalMPData));
+      den = lrs_alloc_mp_vector(GMPmat_Cols(internalMPData));
+
+      P = lrs_alloc_dic (Q);
+      assert( P != NULL );
+
+      
+      struct GMPmat *retMat;
+      retMat = GMPmat_create(0, GMPmat_Cols(internalMPData), 1);
+      
+      mpq_t *curRow;
+      curRow = calloc(GMPmat_Cols(internalMPData), sizeof(mpq_t));
+      assert( curRow != NULL );
+      mpq_row_init(curRow, GMPmat_Cols(internalMPData));
+
+
+
+      for (i = 1; i <= GMPmat_Rows(internalMPData); ++i)
+      {
+        GMPmat_getRow(num, den, internalMPData, i-1);
+        lrs_set_row_mp(P,Q,i,num,den,GE);
+      }
+
+
+      /* ------------------------- */
+      /* All inequalities are now in the LRS structures */
+
+      if ( Aeq != NULL ){
+
+        size_t offset = mxGetM(curField);
+        
+        internalMXData = VertConcat(beq,Aeq);
+        GMPmat_destroy( internalMPData );
+
+        internalMPData = GMPmat_fromMXArray(internalMXData);
+        mxDestroyArray(internalMXData);
+        GMPmat_invertSignForFacetEnumeration(internalMPData);
+
+        for (i = 1; i <= GMPmat_Rows(internalMPData); ++i)
+        {
+          GMPmat_getRow(num, den, internalMPData, i-1);
+          lrs_set_row_mp(P,Q,i + offset , num , den , EQ);
+        }
+
+      }
+
+      /* All inequalities and equalities are now in LRS structures */
+
+      if( lrs_getfirstbasis (&P, Q, &Lin, TRUE) ){
+
+
+      for (col = 0L; col < Q->nredundcol; col++)
+        lrs_printoutput (Q, Lin[col]); 
+
+      do
+        {
+          for (col = 0L; col <= P->d; col++)
+            if (lrs_getsolution (P, Q, output, col)) {
+              mpz_to_mpq(curRow, output, GMPmat_Cols(retMat));
+              retMat = GMPmat_appendRow(retMat, curRow);
+              GMPmat_everyNrows(retMat, pN, "vertices/rays");
+            }
+        }
+        while (lrs_getnextbasis (&P, Q, FALSE));
+
+        mpq_row_clean(curRow, GMPmat_Cols(retMat));
+        lrs_clear_mp_vector (output, Q->n);
+        lrs_clear_mp_vector (num, Q->n);
+        lrs_clear_mp_vector (den, Q->n);
+        lrs_free_dic (P,Q);
+        lrs_free_dat (Q);
+
+      } else {
+
+        printf("Empty set.\n");
+        mpq_row_clean(curRow, GMPmat_Cols(retMat));
+        lrs_clear_mp_vector (output, Q->n);
+        lrs_clear_mp_vector (num, Q->n);
+        lrs_clear_mp_vector (den, Q->n);
+        lrs_free_dic (P,Q);
+        lrs_free_dat (Q);
+
+      }
+
+      GMPmat_destroy(internalMPData);
+      mxDestroyArray(retVal);
+      retVal = MXArray_fromGMPmat(retMat);
+      GMPmat_destroy(retMat);
+
+  }
+
+    return retVal;
+}
+#endif /* DIRECT */
