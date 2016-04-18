@@ -1241,7 +1241,7 @@ mxArray *directCallWrapper(const mxArray *data)
   long maxdepth = 0L;
   curField = extractField(data, "maxdepth");
   if ( curField != NULL ){
-    if (!mxIsScalar(curField) || !mxIsDouble(curField) || mxIsComplex(curField))
+    if ((!mxIsScalar(curField) || !mxIsDouble(curField)) || mxIsComplex(curField))
       mexErrMsgTxt("'maxdepth' must be a non-negative real number.\n");
     
     maxdepth = (long)mxGetScalar(curField);
@@ -1253,7 +1253,7 @@ mxArray *directCallWrapper(const mxArray *data)
   long maxoutput = 0L;
   curField = extractField(data, "maxoutput");
   if ( curField != NULL ){
-    if (!mxIsScalar(curField) || !mxIsDouble(curField) || mxIsComplex(curField))
+    if ((!mxIsScalar(curField) || !mxIsDouble(curField)) || mxIsComplex(curField))
       mexErrMsgTxt("'maxoutput' must be a non-negative real number.\n");
     
     maxoutput = (long)mxGetScalar(curField);
@@ -1265,7 +1265,7 @@ mxArray *directCallWrapper(const mxArray *data)
   long maxcobases = 0L;
   curField = extractField(data, "maxcobases");
   if ( curField != NULL ){
-    if (!mxIsScalar(curField) || !mxIsDouble(curField) || mxIsComplex(curField))
+    if ( (!mxIsScalar(curField) || !mxIsDouble(curField) ) || mxIsComplex(curField))
       mexErrMsgTxt("'maxcobases' must be a non-negative real number.\n");
     
     maxcobases = (long)mxGetScalar(curField);
@@ -1425,7 +1425,7 @@ mxArray *directCallWrapper(const mxArray *data)
     if (curField == NULL || rhs == NULL )
       mexErrMsgTxt("Fields 'Aineq' and 'bineq' are required for H-representation.\n");
 
-    if (!mxIsDouble(curField) || mxIsComplex(curField) || !mxIsDouble(rhs) || mxIsComplex(rhs))
+    if ( (!mxIsDouble(curField) || mxIsComplex(curField)) || (!mxIsDouble(rhs) || mxIsComplex(rhs)) )
         mexErrMsgTxt("All data must be real and numeric.\n");
    
     if (mxGetM(curField) != mxGetM(rhs))
@@ -1440,7 +1440,7 @@ mxArray *directCallWrapper(const mxArray *data)
       if (beq == NULL)
         mexErrMsgTxt("'beq' must be provided.\n");
       
-      if (!mxIsDouble(Aeq) || mxIsComplex(Aeq) || !mxIsDouble(beq) || mxIsComplex(beq))
+      if ( (!mxIsDouble(Aeq) || mxIsComplex(Aeq)) || (!mxIsDouble(beq) || mxIsComplex(beq)) )
         mexErrMsgTxt("All data must be real and numeric.\n");
 
       if (mxGetN(curField) != mxGetN(Aeq))
