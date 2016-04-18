@@ -23,14 +23,14 @@ ifeq ($(UNAME_S),Darwin)
 	EXTENTION = dylib
 	MATLABLIB = $(MATLABROOT)/bin/maci64/
 endif
-ifeq ($(UNAME_S),Linux)
+ifeq ($(UNAME_S),Linux)	
 	LFLAGS += -Wl,-rpath,$(MATLABLIB)
 	EXTENTION = so
 	MATLABLIB = $(MATLABROOT)/bin/glnxa64/
 endif
 
 OBJECTS = mainFunctions.o translation_functions.o lrslib.o lrsgmp.o
-
+CC = gcc
 
 all: libgeocalc.$(EXTENTION)
 	mv libgeocalc.$(EXTENTION) $(INSTALLDIR)/libgeocalc.$(EXTENTION)

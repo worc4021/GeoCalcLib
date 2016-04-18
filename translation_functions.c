@@ -1278,21 +1278,19 @@ mxArray *directCallWrapper(const mxArray *data)
   {
     /* Validate that vertices or rays were passed */
     curField = extractField(data, "V");
-    if (curField == NULL){
-      if (!mxIsDouble(curField) || mxIsComplex(curField))
-        mexErrMsgTxt("All data must be real and numeric.\n");
+    if (curField == NULL){      
       curField = extractField(data, "R");
       if (curField == NULL )
         mexErrMsgTxt("No vertices or rays passed.\n");
     } else {
       /* Extract Vertices */
+      if (!mxIsDouble(curField) || mxIsComplex(curField))
+        mexErrMsgTxt("All data must be real and numeric.\n");
       mxArray *typeVec;
       typeVec = MXArray_constantVector(mxGetM(curField), 1.);
-
       mxArray *internalMXData;
       internalMXData = VertConcat(typeVec, curField);
       mxDestroyArray(typeVec);
-
       curField = extractField(data, "R");
       if (curField != NULL )
       {
@@ -1302,9 +1300,11 @@ mxArray *directCallWrapper(const mxArray *data)
         if (mxGetN(curField) != (mxGetN(internalMXData)-1) ){
           mxDestroyArray(internalMXData);
           mexErrMsgTxt("Vertices and rays need to be of the same dimension.\n");
-        } else {
+        } else {        
           typeVec = MXArray_constantVector(mxGetM(curField), 0.);
-          internalMXData = MXArray_stack(internalMXData, VertConcat(typeVec,curField) );
+          mxArray *tempDat;
+          tempDat = VertConcat(typeVec,curField);
+          internalMXData = MXArray_stack(internalMXData, tempDat );
           mxDestroyArray(typeVec);
         }
 
@@ -1313,7 +1313,6 @@ mxArray *directCallWrapper(const mxArray *data)
       struct GMPmat *internalMPData;
       internalMPData = GMPmat_fromMXArray(internalMXData);
       mxDestroyArray(internalMXData);
-
       /* ----------------------------- */
 
     lrs_dic *P;
@@ -1362,7 +1361,6 @@ mxArray *directCallWrapper(const mxArray *data)
       GMPmat_getRow(num, den, internalMPData, i-1);
       lrs_set_row_mp(P ,Q ,i ,num ,den , GE);
     }
-
     if ( lrs_getfirstbasis (&P, Q, &Lin, TRUE) ){
     
     for (col = 0L; col < Q->nredundcol; col++)
@@ -1386,8 +1384,6 @@ mxArray *directCallWrapper(const mxArray *data)
     lrs_free_dic ( P , Q);
     lrs_free_dat ( Q );
 
-    GMPmat_destroy(internalMPData);
-
 
   } else {
 
@@ -1400,13 +1396,12 @@ mxArray *directCallWrapper(const mxArray *data)
     lrs_free_dic ( P , Q);
     lrs_free_dat ( Q );
 
-    GMPmat_destroy(internalMPData);
+    
 
   }
-
     /* ----------------------------- */
-
-      GMPmat_invertSignForFacetEnumeration(retMat); /* result of LRS is still b+Ax>=0 */
+      GMPmat_destroy(internalMPData);
+      GMPmat_invertSignForFacetEnumeration(retMat); /* result of LRS is still b+Ax>=0 */  
       mxDestroyArray(retVal);
       retVal = MXArray_fromGMPmat(retMat);
       GMPmat_destroy(retMat);
