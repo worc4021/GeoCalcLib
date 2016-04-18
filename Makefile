@@ -30,7 +30,6 @@ ifeq ($(UNAME_S),Linux)
 endif
 
 OBJECTS = mainFunctions.o translation_functions.o lrslib.o lrsgmp.o
-CC = gcc
 
 all: libgeocalc.$(EXTENTION)
 	mv libgeocalc.$(EXTENTION) $(INSTALLDIR)/libgeocalc.$(EXTENTION)
