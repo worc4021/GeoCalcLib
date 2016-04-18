@@ -1588,7 +1588,9 @@ mxArray *directCallWrapper(const mxArray *data)
       GMPmat_destroy(retMat);
 
   }
-
-    return retVal;
+    mxArray *returnValue;
+    returnValue = VertBreakdown(retVal);
+    mxDestroyArray(retVal);
+    return returnValue;
 }
 #endif /* DIRECT */
