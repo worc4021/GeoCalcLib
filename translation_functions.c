@@ -1285,8 +1285,8 @@ mxArray *directCallWrapper(const mxArray *data)
       if (curField == NULL )
         mexErrMsgTxt("No vertices or rays passed.\n");
       else {
-        if (!mxIsDouble(curField) || mxIsComplex(curField))
-          mexErrMsgTxt("All data must be real and numeric.\n");
+        if (!mxIsDouble(curField) || mxIsSparse(curField) || mxIsComplex(curField))
+          mexErrMsgTxt("All data must be real, dense and numeric.\n");
         mxArray *typeVec;
         typeVec = MXArray_constantVector(mxGetM(curField), 0.);
         mxDestroyArray(internalMXData);
@@ -1295,8 +1295,8 @@ mxArray *directCallWrapper(const mxArray *data)
       }
     } else {
       /* Extract Vertices */
-      if (!mxIsDouble(curField) || mxIsComplex(curField))
-        mexErrMsgTxt("All data must be real and numeric.\n");
+      if (!mxIsDouble(curField) || mxIsSparse(curField) || mxIsComplex(curField))
+        mexErrMsgTxt("All data must be real, dense and numeric.\n");
       mxArray *typeVec;
       typeVec = MXArray_constantVector(mxGetM(curField), 1.);
       mxDestroyArray(internalMXData);
@@ -1432,8 +1432,8 @@ mxArray *directCallWrapper(const mxArray *data)
     if (curField == NULL || rhs == NULL )
       mexErrMsgTxt("Fields 'Aineq' and 'bineq' are required for H-representation.\n");
 
-    if ( (!mxIsDouble(curField) || mxIsComplex(curField)) || (!mxIsDouble(rhs) || mxIsComplex(rhs)) )
-        mexErrMsgTxt("All data must be real and numeric.\n");
+    if ( (!mxIsDouble(curField) || mxIsSparse(curField) || mxIsComplex(curField)) || (!mxIsDouble(rhs) || mxIsComplex(rhs)) )
+        mexErrMsgTxt("All data must be real, dense and numeric.\n");
    
     if (mxGetM(curField) != mxGetM(rhs))
       mexErrMsgTxt("'Aineq' and 'bineq' must have the same number of rows.\n");
@@ -1447,8 +1447,8 @@ mxArray *directCallWrapper(const mxArray *data)
       if (beq == NULL)
         mexErrMsgTxt("'beq' must be provided.\n");
       
-      if ( (!mxIsDouble(Aeq) || mxIsComplex(Aeq)) || (!mxIsDouble(beq) || mxIsComplex(beq)) )
-        mexErrMsgTxt("All data must be real and numeric.\n");
+      if ( (!mxIsDouble(Aeq) || mxIsSparse(Aeq) || mxIsComplex(Aeq)) || (!mxIsDouble(beq) || mxIsComplex(beq)) )
+        mexErrMsgTxt("All data must be real, dense and numeric.\n");
 
       if (mxGetN(curField) != mxGetN(Aeq))
         mexErrMsgTxt("'Aineq' and 'Aeq' must have the same number of columns.\n");
