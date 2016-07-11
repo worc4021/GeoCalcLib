@@ -48,20 +48,27 @@ lcm (lrs_mp a, lrs_mp b)			/* a = least common multiple of a, b; b is preserved 
 void 
 reduce (lrs_mp Na, lrs_mp Da)	/* reduces Na/Da by gcd(Na,Da) */
 {
-  lrs_mp Nb, Db, Nc, Dc;
-  lrs_alloc_mp(Nb); lrs_alloc_mp(Db);
-  lrs_alloc_mp(Nc); lrs_alloc_mp(Dc);
-  copy (Nb, Na);
-  copy (Db, Da);
-  storesign (Nb, POS);
-  storesign (Db, POS);
-  copy (Nc, Na);
-  copy (Dc, Da);
-  gcd (Nb, Db);			/* Nb is the gcd(Na,Da) */
-  exactdivint (Nc, Nb, Na);
-  exactdivint (Dc, Nb, Da);
-  lrs_clear_mp(Nb); lrs_clear_mp(Db);
-  lrs_clear_mp(Nc); lrs_clear_mp(Dc);
+  // lrs_mp Nb, Db, Nc, Dc;
+  // lrs_alloc_mp(Nb); lrs_alloc_mp(Db);
+  // lrs_alloc_mp(Nc); lrs_alloc_mp(Dc);
+  // copy (Nb, Na);
+  // copy (Db, Da);
+  // storesign (Nb, POS);
+  // storesign (Db, POS);
+  // copy (Nc, Na);
+  // copy (Dc, Da);
+  // gcd (Nb, Db);			/* Nb is the gcd(Na,Da) */
+  // exactdivint (Nc, Nb, Na);
+  // exactdivint (Dc, Nb, Da);
+  // lrs_clear_mp(Nb); lrs_clear_mp(Db);
+  // lrs_clear_mp(Nc); lrs_clear_mp(Dc);
+  mpq_t temp;
+  mpq_init(temp);
+  mpq_set_num(temp, Na);
+  mpq_set_den(temp, Da);
+  mpq_canonicalize(temp);
+  mpq_get_num(Na,temp);
+  mpq_get_den(Da,temp);
 }
 
 void 

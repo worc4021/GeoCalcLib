@@ -68,6 +68,7 @@ size_t GMPmat_count_zeros(const struct GMPmat *A);
 #ifdef DEBUG
 void GMPmat_print(const struct GMPmat *A);
 void GMPmat_printRow(const struct GMPmat *A, size_t r);
+void GMPmat_debugPrint(const struct GMPmat *A);
 #endif /* DEBUG */
 
 void GMPmat_getRow(mpz_t *ropN, mpz_t *ropD, struct GMPmat *A, size_t r);

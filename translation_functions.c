@@ -660,6 +660,27 @@ struct GMPmat *GMPmat_create (size_t m, size_t n, int init)
 }
 
 #ifdef DEBUG
+void GMPmat_debugPrint(const struct GMPmat *A)
+{
+  FILE *fp;
+  char helper[] = "/Users/Manuel/Desktop/debugFile.txt";
+  fp = fopen(helper, "a");
+  assert( fp != NULL );
+  size_t i,j;
+  fprintf(fp, "%lu %lu\n", GMPmat_Rows(A), GMPmat_Cols(A));
+  for (i = 0; i < GMPmat_Rows(A); ++i)
+    {
+        for (j = 0; j < GMPmat_Cols(A); ++j)
+        {
+            mpq_out_str(fp, 10, A->data[i*(A->n) + j]);
+            fprintf(fp, " ");
+        }
+        fprintf(fp, "\n" );
+    }
+    fprintf(fp, "\n" );
+  fclose(fp);
+}
+
 void GMPmat_print(const struct GMPmat *A)
 {
     const char *val;
@@ -1325,6 +1346,11 @@ mxArray *directCallWrapper(const mxArray *data)
       struct GMPmat *internalMPData;
       internalMPData = GMPmat_fromMXArray(internalMXData);
       mxDestroyArray(internalMXData);
+#ifdef DEBUG    
+    if (extractField(data, "debug") != NULL) {
+        GMPmat_debugPrint(internalMPData);
+      }
+#endif /* DEBUG */
       /* ----------------------------- */
 
     lrs_dic *P;
@@ -1474,7 +1500,11 @@ mxArray *directCallWrapper(const mxArray *data)
     mxDestroyArray(internalMXData);
 
     GMPmat_invertSignForFacetEnumeration(internalMPData);
-
+#ifdef DEBUG    
+    if (extractField(data, "debug") != NULL) {
+        GMPmat_debugPrint(internalMPData);
+      }
+#endif /* DEBUG */
     /* ------------------------- */
 
     lrs_dic *P;
@@ -1542,6 +1572,11 @@ mxArray *directCallWrapper(const mxArray *data)
         internalMPData = GMPmat_fromMXArray(internalMXData);
         mxDestroyArray(internalMXData);
         GMPmat_invertSignForFacetEnumeration(internalMPData);
+#ifdef DEBUG    
+    if (extractField(data, "debug") != NULL) {
+        GMPmat_debugPrint(internalMPData);
+      }
+#endif /* DEBUG */
 
         for (i = 1; i <= GMPmat_Rows(internalMPData); ++i)
         {
