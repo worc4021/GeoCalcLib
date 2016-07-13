@@ -1287,8 +1287,9 @@ mpz_t *mpz_row_init_one(size_t m)
     assert(m > 0);
     mpz_t *retVal;
     retVal = malloc(m*sizeof(mpz_t));
+    size_t i;
     assert(retVal != NULL);
-    for (size_t i = 0; i < m; ++i)
+    for (i = 0; i < m; ++i)
     {
         mpz_init_set_ui(retVal[i],1L);
     }
