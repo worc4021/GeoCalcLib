@@ -249,7 +249,123 @@ mxArray *MXArray_stack(mxArray *A,mxArray *B)
   return retVal;
 }
 
+mxArray *MXArray_fromGMPlist(GMPlist *A, size_t n)
+{
+    mxArray *retVal;
+    double *ptr;
+    retVal = mxCreateNumericMatrix(A->lte, n, OUTPUT_PRECISION, mxREAL);
+    ptr = GMPlist_toDouble(A, n);
+    mxSetPr(retVal,ptr);
+    
+    return retVal;
+}
+
+
 #endif /* NOMATLAB */
+
+/* Addition of GMPlist 11/07/2016 */
+
+void GMPlist_push(GMPlist** elem, mpq_t* data){
+  GMPlist* nextElem = malloc(sizeof(GMPlist));
+  
+  nextElem->next = *elem;
+  nextElem->lte = (*elem)->lte + 1;
+
+  nextElem->data = data;
+  *elem = nextElem;
+}
+
+mpq_t *GMPlist_pull(GMPlist** elem, size_t n){
+  assert(*elem !=  NULL);
+  mpq_t* retVal = malloc( n*sizeof(mpq_t) );
+  size_t i;
+  GMPlist* curElem = (*elem);
+  for (i = 0; i < n; i++)
+  {
+    mpq_init(retVal[i]);
+    mpq_set(retVal[i],curElem->data[i]);
+    mpq_clear(curElem->data[i]);
+  }
+  
+  (*elem) = curElem->next;
+  free(curElem);
+  return retVal;
+}
+
+#ifdef DEBUG
+void GMPlist_print(GMPlist* elem, size_t n){
+  assert(elem->next != NULL );
+  GMPlist* curHead = elem;
+  size_t i;
+  while (curHead->next != NULL){
+    for (i = 0; i < n; i++){
+      mpq_out_str(stdout,10,curHead->data[i]);
+      fprintf(stdout, " ");
+    }
+    fprintf(stdout, "\n" );
+    curHead = curHead->next;
+  }
+  fprintf(stdout, "\n" );
+
+}
+#endif /* DEBUG */
+
+
+struct GMPmat *GMPlist_toGMPmat(GMPlist* elem, size_t n){
+  assert( elem->next != NULL );
+  struct GMPmat *retVal;
+  GMPlist* curElem;
+  GMPlist* nextElem;
+  curElem = elem;
+  size_t i, lte;
+  retVal = malloc(sizeof(*retVal));
+  retVal->empty = 0;
+  retVal->m = elem->lte;
+  retVal->n = n;
+  retVal->data = malloc( retVal->m*n*sizeof(*retVal->data) );
+  
+  while (curElem->next != NULL){
+    nextElem = curElem->next;
+    lte = curElem->lte;
+    for (i=0; i < n; i++){
+      mpq_init(retVal->data[n*(lte-1)+i]);
+      mpq_set(retVal->data[n*(lte-1)+i], curElem->data[i]);
+      mpq_clear(curElem->data[i]);
+    }
+    free(curElem->data);
+    free(curElem);
+    curElem = nextElem;
+
+  }
+  return retVal;
+} 
+
+double *GMPlist_toDouble(GMPlist* elem, size_t n){
+  assert( elem->next != NULL );
+  double* retVal;
+  GMPlist* curElem;
+  GMPlist* nextElem;
+  curElem = elem;
+  size_t i, lte;
+
+  retVal = malloc((elem->lte)*n*sizeof(double));
+  
+  while (curElem->next != NULL){
+    nextElem = curElem->next;
+    lte = curElem->lte;
+    for (i=0; i < n; i++){
+      retVal[n*(lte-1)+i] = mpq_get_d(curElem->data[i]);
+      mpq_clear(curElem->data[i]);
+    }
+    free(curElem);
+    curElem = nextElem;
+
+  }
+  return retVal;
+}
+
+/* end of additional GMPlist stuff */
+
 
 int my_lrs_init()
 {
@@ -282,24 +398,22 @@ struct GMPmat *H2V(struct GMPmat *inp)
       
       output = lrs_alloc_mp_vector (Qv->n);
 
+      GMPlist* retVal;
+      retVal = malloc(sizeof(GMPlist));
+      retVal->next = NULL;
+      retVal->lte = 0;
+
       lrs_mp_vector num, den;
       num = lrs_alloc_mp_vector(GMPmat_Cols(inp));
       den = lrs_alloc_mp_vector(GMPmat_Cols(inp));
 
       Pv = lrs_alloc_dic (Qv);
       assert( Pv != NULL );
-
       
-      struct GMPmat *Helper;
-      Helper = GMPmat_create(0, GMPmat_Cols(inp), 1);
+      struct GMPmat *out;
       
       mpq_t *curRow;
-      curRow = calloc(GMPmat_Cols(inp), sizeof(mpq_t));
-      assert( curRow != NULL );
-      mpq_row_init(curRow, GMPmat_Cols(inp));
-
-
-
+      
       for (i = 1; i <= GMPmat_Rows(inp); ++i)
       {
         GMPmat_getRow(num, den, inp, i-1);
@@ -316,37 +430,36 @@ struct GMPmat *H2V(struct GMPmat *inp)
         {
           for (col = 0L; col <= Pv->d; col++)
             if (lrs_getsolution (Pv, Qv, output, col)) {
-              mpz_to_mpq(curRow, output, GMPmat_Cols(Helper));
-              Helper = GMPmat_appendRow(Helper, curRow);
-              GMPmat_everyNrows(Helper, pN, "vertices/rays");
+              curRow = mpz_to_mpq_vec( output, GMPmat_Cols(inp));
+              GMPlist_push(&retVal,curRow);
             }
         }
         while (lrs_getnextbasis (&Pv, Qv, FALSE));
-
-        mpq_row_clean(curRow, GMPmat_Cols(Helper));
+        
         lrs_clear_mp_vector (output, Qv->n);
         lrs_clear_mp_vector (num, Qv->n);
         lrs_clear_mp_vector (den, Qv->n);
         lrs_free_dic (Pv,Qv);
         lrs_free_dat (Qv);
 
+        out = GMPlist_toGMPmat(retVal, GMPmat_Cols(inp));
         GMPmat_destroy(inp);
-        
-        return Helper;
+
+        return out;
 
       } else {
 
         printf("Empty set.\n");
-        mpq_row_clean(curRow, GMPmat_Cols(Helper));
         lrs_clear_mp_vector (output, Qv->n);
         lrs_clear_mp_vector (num, Qv->n);
         lrs_clear_mp_vector (den, Qv->n);
         lrs_free_dic (Pv,Qv);
         lrs_free_dat (Qv);
-        
+        out = GMPmat_create(0, GMPmat_Cols(inp) ,1);
+
         GMPmat_destroy(inp);
 
-        return Helper;
+        return out;
 
       }
 }
@@ -368,28 +481,37 @@ struct GMPmat *V2H(struct GMPmat *inp)
     Q->m = GMPmat_Rows(inp);
     Q->n = GMPmat_Cols(inp);
     Q->hull = TRUE;
+    Q->polytope = TRUE;
 
     output = lrs_alloc_mp_vector (Q->n);
 
-    lrs_mp_vector num, den;
-    num = lrs_alloc_mp_vector(GMPmat_Cols(inp));
-    den = lrs_alloc_mp_vector(GMPmat_Cols(inp));
+    GMPlist* retVal;
+    retVal = malloc(sizeof(GMPlist));
+    retVal->next = NULL;
+    retVal->lte = 0;
+
+    mpz_t *num, *den;
+    num = mpz_row_init_one(GMPmat_Cols(inp));
+    den = mpz_row_init_one(GMPmat_Cols(inp));
 
     P = lrs_alloc_dic (Q);
     assert ( P != NULL );
 
     struct GMPmat *retMat;
-    retMat = GMPmat_create(0, GMPmat_Cols(inp), 1);
+
       
     mpq_t *curRow;
-    curRow = calloc(GMPmat_Cols(inp), sizeof(mpq_t));
-    assert( curRow != NULL );
-    mpq_row_init(curRow, GMPmat_Cols(inp));
 
+    lrs_set_row_mp(P ,Q ,0 ,num ,den , GE);
+    mpz_set_si( P->A[0][0], 1L );
 
     for (i = 1; i <= GMPmat_Rows(inp); ++i)
     {
       GMPmat_getRow(num, den, inp, i-1);
+      if ( zero(num[0]) ) {
+          Q->polytope = FALSE;
+          Q->homogeneous = FALSE;
+        }
       lrs_set_row_mp(P ,Q ,i ,num ,den , GE);
     }
 
@@ -402,19 +524,19 @@ struct GMPmat *V2H(struct GMPmat *inp)
     {
       for (col = 0; col <= P->d; col++)
         if (lrs_getsolution (P, Q, output, col)){
-          mpz_to_mpq(curRow, output, GMPmat_Cols(retMat));
-          retMat = GMPmat_appendRow(retMat, curRow);
-          GMPmat_everyNrows(retMat, pN, "inequalities");
+          curRow = mpz_to_mpq_vec( output, GMPmat_Cols(inp));
+          GMPlist_push(&retVal,curRow);
         }
     }
     while (lrs_getnextbasis (&P, Q, FALSE));
 
-    mpq_row_clean( curRow, GMPmat_Cols(retMat) );
     lrs_clear_mp_vector ( output, Q->n);
-    lrs_clear_mp_vector ( num, Q->n);
-    lrs_clear_mp_vector ( den, Q->n);
+    mpz_row_clean ( num, GMPmat_Cols(inp));
+    mpz_row_clean ( den, GMPmat_Cols(inp));
     lrs_free_dic ( P , Q);
     lrs_free_dat ( Q );
+
+    retMat = GMPlist_toGMPmat(retVal, GMPmat_Cols(inp));
 
     GMPmat_destroy(inp);
 
@@ -423,14 +545,14 @@ struct GMPmat *V2H(struct GMPmat *inp)
   } else {
 
     printf("Empty set.\n");
-    retMat->empty = 1;
-    mpq_row_clean( curRow, GMPmat_Cols(retMat) );
     lrs_clear_mp_vector ( output, Q->n);
-    lrs_clear_mp_vector ( num, Q->n);
-    lrs_clear_mp_vector ( den, Q->n);
+    mpz_row_clean ( num, GMPmat_Cols(inp));
+    mpz_row_clean ( den, GMPmat_Cols(inp));
     lrs_free_dic ( P , Q);
     lrs_free_dat ( Q );
 
+    retMat = GMPmat_create(0, GMPmat_Cols(inp) ,1);
+    retMat->empty = 1;
     GMPmat_destroy(inp);
 
     return retMat;
@@ -438,6 +560,184 @@ struct GMPmat *V2H(struct GMPmat *inp)
   }
 
 }
+
+
+// struct GMPmat *H2V(struct GMPmat *inp)
+// {
+//     lrs_dic *Pv;
+//     lrs_dat *Qv;
+//     lrs_mp_vector output;
+//     lrs_mp_matrix Lin;
+
+//       size_t i;
+//       long col;
+
+//       assert( my_lrs_init () == TRUE );
+
+//       Qv = lrs_alloc_dat ("LRS globals");
+//       assert( Qv!= NULL );
+
+//       Qv->m = GMPmat_Rows(inp);
+//       Qv->n = GMPmat_Cols(inp);
+      
+//       output = lrs_alloc_mp_vector (Qv->n);
+
+//       lrs_mp_vector num, den;
+//       num = lrs_alloc_mp_vector(GMPmat_Cols(inp));
+//       den = lrs_alloc_mp_vector(GMPmat_Cols(inp));
+
+//       Pv = lrs_alloc_dic (Qv);
+//       assert( Pv != NULL );
+
+      
+//       struct GMPmat *Helper;
+//       Helper = GMPmat_create(0, GMPmat_Cols(inp), 1);
+      
+//       mpq_t *curRow;
+//       curRow = calloc(GMPmat_Cols(inp), sizeof(mpq_t));
+//       assert( curRow != NULL );
+//       mpq_row_init(curRow, GMPmat_Cols(inp));
+
+
+
+//       for (i = 1; i <= GMPmat_Rows(inp); ++i)
+//       {
+//         GMPmat_getRow(num, den, inp, i-1);
+//         lrs_set_row_mp(Pv,Qv,i,num,den,GE);
+//       }
+
+//       if( lrs_getfirstbasis (&Pv, Qv, &Lin, TRUE) ){
+
+
+//       for (col = 0L; col < Qv->nredundcol; col++)
+//         lrs_printoutput (Qv, Lin[col]); 
+
+//       do
+//         {
+//           for (col = 0L; col <= Pv->d; col++)
+//             if (lrs_getsolution (Pv, Qv, output, col)) {
+//               mpz_to_mpq(curRow, output, GMPmat_Cols(Helper));
+//               Helper = GMPmat_appendRow(Helper, curRow);
+//               GMPmat_everyNrows(Helper, pN, "vertices/rays");
+//             }
+//         }
+//         while (lrs_getnextbasis (&Pv, Qv, FALSE));
+
+//         mpq_row_clean(curRow, GMPmat_Cols(Helper));
+//         lrs_clear_mp_vector (output, Qv->n);
+//         lrs_clear_mp_vector (num, Qv->n);
+//         lrs_clear_mp_vector (den, Qv->n);
+//         lrs_free_dic (Pv,Qv);
+//         lrs_free_dat (Qv);
+
+//         GMPmat_destroy(inp);
+        
+//         return Helper;
+
+//       } else {
+
+//         printf("Empty set.\n");
+//         mpq_row_clean(curRow, GMPmat_Cols(Helper));
+//         lrs_clear_mp_vector (output, Qv->n);
+//         lrs_clear_mp_vector (num, Qv->n);
+//         lrs_clear_mp_vector (den, Qv->n);
+//         lrs_free_dic (Pv,Qv);
+//         lrs_free_dat (Qv);
+        
+//         GMPmat_destroy(inp);
+
+//         return Helper;
+
+//       }
+// }
+
+// struct GMPmat *V2H(struct GMPmat *inp)
+// {
+//     lrs_dic *P;
+//     lrs_dat *Q;
+//     lrs_mp_vector output;
+//     lrs_mp_matrix Lin;
+
+//     long i;
+//     long col;
+
+//     assert( my_lrs_init () == TRUE );
+
+//     Q = lrs_alloc_dat ("LRS globals");
+//     assert ( Q != NULL );
+//     Q->m = GMPmat_Rows(inp);
+//     Q->n = GMPmat_Cols(inp);
+//     Q->hull = TRUE;
+
+//     output = lrs_alloc_mp_vector (Q->n);
+
+//     lrs_mp_vector num, den;
+//     num = lrs_alloc_mp_vector(GMPmat_Cols(inp));
+//     den = lrs_alloc_mp_vector(GMPmat_Cols(inp));
+
+//     P = lrs_alloc_dic (Q);
+//     assert ( P != NULL );
+
+//     struct GMPmat *retMat;
+//     retMat = GMPmat_create(0, GMPmat_Cols(inp), 1);
+      
+//     mpq_t *curRow;
+//     curRow = calloc(GMPmat_Cols(inp), sizeof(mpq_t));
+//     assert( curRow != NULL );
+//     mpq_row_init(curRow, GMPmat_Cols(inp));
+
+
+//     for (i = 1; i <= GMPmat_Rows(inp); ++i)
+//     {
+//       GMPmat_getRow(num, den, inp, i-1);
+//       lrs_set_row_mp(P ,Q ,i ,num ,den , GE);
+//     }
+
+//     if ( lrs_getfirstbasis (&P, Q, &Lin, TRUE) ){
+    
+//     for (col = 0L; col < Q->nredundcol; col++)
+//       lrs_printoutput (Q, Lin[col]);
+
+//     do
+//     {
+//       for (col = 0; col <= P->d; col++)
+//         if (lrs_getsolution (P, Q, output, col)){
+//           mpz_to_mpq(curRow, output, GMPmat_Cols(retMat));
+//           retMat = GMPmat_appendRow(retMat, curRow);
+//           GMPmat_everyNrows(retMat, pN, "inequalities");
+//         }
+//     }
+//     while (lrs_getnextbasis (&P, Q, FALSE));
+
+//     mpq_row_clean( curRow, GMPmat_Cols(retMat) );
+//     lrs_clear_mp_vector ( output, Q->n);
+//     lrs_clear_mp_vector ( num, Q->n);
+//     lrs_clear_mp_vector ( den, Q->n);
+//     lrs_free_dic ( P , Q);
+//     lrs_free_dat ( Q );
+
+//     GMPmat_destroy(inp);
+
+//     return retMat;
+
+//   } else {
+
+//     printf("Empty set.\n");
+//     retMat->empty = 1;
+//     mpq_row_clean( curRow, GMPmat_Cols(retMat) );
+//     lrs_clear_mp_vector ( output, Q->n);
+//     lrs_clear_mp_vector ( num, Q->n);
+//     lrs_clear_mp_vector ( den, Q->n);
+//     lrs_free_dic ( P , Q);
+//     lrs_free_dat ( Q );
+
+//     GMPmat_destroy(inp);
+
+//     return retMat;
+
+//   }
+
+// }
 
 struct GMPmat *reducemat(struct GMPmat *inp)
 {
@@ -982,6 +1282,19 @@ void mpz_row_init(mpz_t *row, size_t m)
     }
 }
 
+mpz_t *mpz_row_init_one(size_t m)
+{
+    assert(m > 0);
+    mpz_t *retVal;
+    retVal = malloc(m*sizeof(mpz_t));
+    assert(retVal != NULL);
+    for (size_t i = 0; i < m; ++i)
+    {
+        mpz_init_set_ui(retVal[i],1L);
+    }
+    return retVal;
+}
+
 void mpq_row_init(mpq_t *row, size_t m)
 {
     assert(row != NULL);
@@ -1044,6 +1357,38 @@ void mpz_to_mpq(mpq_t *rop, mpz_t *op, size_t m)
         }
     }
 }
+
+mpq_t *mpz_to_mpq_vec(mpz_t *op, size_t m)
+{
+    size_t i;
+    assert( op != NULL);
+    mpq_t *retVal;
+    retVal = malloc(m*sizeof(*retVal));
+    if (zero(op[0]))
+    {
+        mpz_t norm;
+        mpz_init(norm);
+        mpz_norm(norm, op, m);
+        for (i = 0; i < m; ++i)
+        {
+            mpq_init(retVal[i]);
+            mpq_set_num(retVal[i], op[i]);
+            mpq_set_den(retVal[i], norm);
+            mpq_canonicalize(retVal[i]);
+        }
+        mpz_clear(norm);
+    }else{
+        for (i = 0; i < m; ++i)
+        {
+            mpq_init(retVal[i]);
+            mpq_set_num(retVal[i], op[i]);
+            mpq_set_den(retVal[i], op[0]);
+            mpq_canonicalize(retVal[i]);
+        }
+    }
+    return retVal;
+}
+
 
 #ifdef DEBUG
 void mpz_row_print(mpz_t *row, size_t n)
@@ -1255,8 +1600,8 @@ mxArray *directCallWrapper(const mxArray *data)
   if (representation[0] != 'V' && representation[0] != 'H')
     mexErrMsgTxt("Field 'rep' must be 'V' or 'H'.\n");
 
-  mxArray *retVal;
-  retVal = mxCreateNumericMatrix(0,1,mxDOUBLE_CLASS,mxREAL);
+  mxArray *retArray;
+  retArray = mxCreateNumericMatrix(0,1,mxDOUBLE_CLASS,mxREAL);
 
 
   long maxdepth = 0L;
@@ -1386,13 +1731,15 @@ mxArray *directCallWrapper(const mxArray *data)
     assert ( P != NULL );
 
     struct GMPmat *retMat;
-    retMat = GMPmat_create(0, GMPmat_Cols(internalMPData), 1);
       
     mpq_t *curRow;
-    curRow = calloc(GMPmat_Cols(internalMPData), sizeof(mpq_t));
-    assert( curRow != NULL );
-    mpq_row_init(curRow, GMPmat_Cols(internalMPData));
 
+    GMPlist* retVal;
+    retVal = malloc(sizeof(GMPlist));
+    retVal->next = NULL;
+    retVal->lte = 0;
+
+    char empty = 0;
 
     for (i = 1; i <= GMPmat_Rows(internalMPData); ++i)
     {
@@ -1408,14 +1755,12 @@ mxArray *directCallWrapper(const mxArray *data)
     {
       for (col = 0; col <= P->d; col++)
         if (lrs_getsolution (P, Q, output, col)){
-          mpz_to_mpq(curRow, output, GMPmat_Cols(retMat));
-          retMat = GMPmat_appendRow(retMat, curRow);
-          GMPmat_everyNrows(retMat, pN, "inequalities");
+          curRow = mpz_to_mpq_vec(output, GMPmat_Cols(internalMPData));
+          GMPlist_push(&retVal, curRow);
         }
     }
     while (lrs_getnextbasis (&P, Q, FALSE));
 
-    mpq_row_clean( curRow, GMPmat_Cols(retMat) );
     lrs_clear_mp_vector ( output, Q->n);
     lrs_clear_mp_vector ( num, Q->n);
     lrs_clear_mp_vector ( den, Q->n);
@@ -1426,8 +1771,7 @@ mxArray *directCallWrapper(const mxArray *data)
   } else {
 
     printf("Empty set.\n");
-    retMat->empty = 1;
-    mpq_row_clean( curRow, GMPmat_Cols(retMat) );
+    empty = 1;
     lrs_clear_mp_vector ( output, Q->n);
     lrs_clear_mp_vector ( num, Q->n);
     lrs_clear_mp_vector ( den, Q->n);
@@ -1438,10 +1782,17 @@ mxArray *directCallWrapper(const mxArray *data)
 
   }
     /* ----------------------------- */
+      if (empty != 1)
+        retMat = GMPlist_toGMPmat(retVal, GMPmat_Cols(internalMPData));
+      else{
+        retMat = GMPmat_create(0, GMPmat_Cols(internalMPData), 1);
+        retMat->empty = empty;
+      }
+
       GMPmat_destroy(internalMPData);
       GMPmat_invertSignForFacetEnumeration(retMat); /* result of LRS is still b+Ax>=0 */  
-      mxDestroyArray(retVal);
-      retVal = MXArray_fromGMPmat(retMat);
+      mxDestroyArray(retArray);
+      retArray = MXArray_fromGMPmat(retMat);
       GMPmat_destroy(retMat);
     
 
@@ -1543,14 +1894,15 @@ mxArray *directCallWrapper(const mxArray *data)
 
       
       struct GMPmat *retMat;
-      retMat = GMPmat_create(0, GMPmat_Cols(internalMPData), 1);
-      
+
       mpq_t *curRow;
-      curRow = calloc(GMPmat_Cols(internalMPData), sizeof(mpq_t));
-      assert( curRow != NULL );
-      mpq_row_init(curRow, GMPmat_Cols(internalMPData));
 
+      GMPlist* retVal;
+      retVal = malloc(sizeof(GMPlist));
+      retVal->next = NULL;
+      retVal->lte = 0;
 
+      char empty = 0;
 
       for (i = 1; i <= GMPmat_Rows(internalMPData); ++i)
       {
@@ -1598,14 +1950,12 @@ mxArray *directCallWrapper(const mxArray *data)
         {
           for (col = 0L; col <= P->d; col++)
             if (lrs_getsolution (P, Q, output, col)) {
-              mpz_to_mpq(curRow, output, GMPmat_Cols(retMat));
-              retMat = GMPmat_appendRow(retMat, curRow);
-              GMPmat_everyNrows(retMat, pN, "vertices/rays");
+              curRow = mpz_to_mpq_vec(output, GMPmat_Cols(internalMPData));
+              GMPlist_push(&retVal, curRow);
             }
         }
         while (lrs_getnextbasis (&P, Q, FALSE));
 
-        mpq_row_clean(curRow, GMPmat_Cols(retMat));
         lrs_clear_mp_vector (output, Q->n);
         lrs_clear_mp_vector (num, Q->n);
         lrs_clear_mp_vector (den, Q->n);
@@ -1615,7 +1965,7 @@ mxArray *directCallWrapper(const mxArray *data)
       } else {
 
         printf("Empty set.\n");
-        mpq_row_clean(curRow, GMPmat_Cols(retMat));
+        empty = 1;
         lrs_clear_mp_vector (output, Q->n);
         lrs_clear_mp_vector (num, Q->n);
         lrs_clear_mp_vector (den, Q->n);
@@ -1623,16 +1973,23 @@ mxArray *directCallWrapper(const mxArray *data)
         lrs_free_dat (Q);
 
       }
+      
+      if (empty != 1)
+        retMat = GMPlist_toGMPmat(retVal, GMPmat_Cols(internalMPData));
+      else{
+        retMat = GMPmat_create(0, GMPmat_Cols(internalMPData), 1);
+        retMat->empty = empty;
+      }
 
       GMPmat_destroy(internalMPData);
-      mxDestroyArray(retVal);
-      retVal = MXArray_fromGMPmat(retMat);
+      mxDestroyArray(retArray);
+      retArray = MXArray_fromGMPmat(retMat);
       GMPmat_destroy(retMat);
 
   }
     mxArray *returnValue;
-    returnValue = VertBreakdown(retVal);
-    mxDestroyArray(retVal);
+    returnValue = VertBreakdown(retArray);
+    mxDestroyArray(retArray);
     return returnValue;
 }
 #endif /* DIRECT */

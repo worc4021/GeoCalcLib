@@ -28,7 +28,6 @@
 #include "mainFunctions.h"
 #include "translation_functions.h"
 
-
 mxArray *vertexEnumeration(const mxArray *A, const mxArray *b)
 {
 	if( mxGetM(A) != mxGetM(b) )
@@ -61,6 +60,39 @@ mxArray *vertexEnumeration(const mxArray *A, const mxArray *b)
 
 	return retVal;
 }
+
+// mxArray *vertexEnumeration(const mxArray *A, const mxArray *b)
+// {
+// 	if( mxGetM(A) != mxGetM(b) )
+// 		mexErrMsgIdAndTxt("GeoCalcLib:Dimensions:vertex:Enumeration","Matrices A and b must have same number of rows.\n" );
+
+// 	if( mxIsEmpty(A) || mxIsEmpty(b) )
+// 		mexErrMsgIdAndTxt("GeoCalcLib:Dimensions:vertex:Enumeration","Matrices must not be empty.\n" );
+
+// 	mxArray *helper, *retVal;
+// 	struct GMPmat *myHelp, *calcMat;
+
+// 	helper = VertConcat( b , A );
+// 	myHelp = GMPmat_fromMXArray( helper );
+	
+// 	mxDestroyArray(helper);
+
+// 	GMPmat_invertSignForFacetEnumeration(myHelp);
+// 	calcMat = H2V(myHelp);
+
+// 	if (!calcMat->empty) {
+// 		helper = MXArray_fromGMPmat(calcMat);
+// 		GMPmat_destroy(calcMat);
+
+// 		retVal = VertBreakdown(helper);
+// 		mxDestroyArray(helper);
+// 	} else {
+// 		GMPmat_destroy(calcMat);
+// 		retVal = createEmptyCell();
+// 	}
+
+// 	return retVal;
+// }
 
 mxArray *facetEnumeration(const mxArray *V, const mxArray *type)
 {

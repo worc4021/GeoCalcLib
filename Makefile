@@ -11,7 +11,7 @@ CFLAGS += -DGMP -DTIMES -DSIGNALS -DB64 -DLRS_QUIET -DNOINFO -DDIRECT
 
 # Set DEBUG macro for functions to print GMPmat and mpx_t type data in debugger, 
 # set NOINFO macro to avoid printing out number of rows/vertices/rays found during computation.
-CFLAGS += -DDEBUG
+# CFLAGS += -DDEBUG
 # DFLAG = -g
 
 

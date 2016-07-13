@@ -33,6 +33,14 @@ struct GMPmat{
     char empty;
 };
 
+struct GMPlist {
+    mpq_t* data;
+    size_t lte;
+    struct GMPlist* next;
+};
+
+typedef struct GMPlist GMPlist;
+
 #ifndef NOMATLAB
 
 #include "mex.h"
@@ -48,12 +56,27 @@ mxArray *VertConcat(const mxArray *A, const mxArray *b);
 mxArray *VertBreakdown(const mxArray *res);
 mxArray *createEmptyCell( );
 mxArray *MXArray_stack(mxArray *A, mxArray *B);
+mxArray *MXArray_fromGMPlist(GMPlist *A, size_t n);
 
 #endif /* NOMATLAB */
+
+
+/* Addition of GMPlist */
+void GMPlist_push(GMPlist** elem, mpq_t* data);
+mpq_t *GMPlist_pull(GMPlist** elem, size_t n);
+
+#ifdef DEBUG
+void GMPlist_print(GMPlist* elem, size_t n);
+#endif /* DEBUG */
+
+struct GMPmat *GMPlist_toGMPmat(GMPlist* elem, size_t n);
+double *GMPlist_toDouble(GMPlist* elem, size_t n);
+
 
 /* Interface to the LRS library */
 
 int my_lrs_init();
+// struct GMPmat *H2V1(struct GMPmat *inp);
 struct GMPmat *H2V(struct GMPmat *inp);
 struct GMPmat *V2H(struct GMPmat *inp);
 struct GMPmat *reducemat(struct GMPmat *inp);
@@ -88,8 +111,10 @@ struct GMPmat *GMPmat_stackVert(struct GMPmat *A, struct GMPmat *B);
 /* Functions to work with GMP data types */
 
 void mpz_to_mpq(mpq_t *rop, mpz_t *op, size_t m);
+mpq_t *mpz_to_mpq_vec(mpz_t *op, size_t m);
 struct GMPmat *GMPmat_appendRow(struct GMPmat *A, mpq_t *row);
 void mpz_norm(mpz_t norm, mpz_t *row, size_t m);
+mpz_t *mpz_row_init_one(size_t m);
 void mpq_row_init(mpq_t *row, size_t m);
 void mpz_row_init(mpz_t *row, size_t m);
 void mpq_row_clean(mpq_t *row, size_t m);
