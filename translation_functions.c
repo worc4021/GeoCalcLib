@@ -562,188 +562,10 @@ struct GMPmat *V2H(struct GMPmat *inp)
 }
 
 
-// struct GMPmat *H2V(struct GMPmat *inp)
-// {
-//     lrs_dic *Pv;
-//     lrs_dat *Qv;
-//     lrs_mp_vector output;
-//     lrs_mp_matrix Lin;
-
-//       size_t i;
-//       long col;
-
-//       assert( my_lrs_init () == TRUE );
-
-//       Qv = lrs_alloc_dat ("LRS globals");
-//       assert( Qv!= NULL );
-
-//       Qv->m = GMPmat_Rows(inp);
-//       Qv->n = GMPmat_Cols(inp);
-      
-//       output = lrs_alloc_mp_vector (Qv->n);
-
-//       lrs_mp_vector num, den;
-//       num = lrs_alloc_mp_vector(GMPmat_Cols(inp));
-//       den = lrs_alloc_mp_vector(GMPmat_Cols(inp));
-
-//       Pv = lrs_alloc_dic (Qv);
-//       assert( Pv != NULL );
-
-      
-//       struct GMPmat *Helper;
-//       Helper = GMPmat_create(0, GMPmat_Cols(inp), 1);
-      
-//       mpq_t *curRow;
-//       curRow = calloc(GMPmat_Cols(inp), sizeof(mpq_t));
-//       assert( curRow != NULL );
-//       mpq_row_init(curRow, GMPmat_Cols(inp));
-
-
-
-//       for (i = 1; i <= GMPmat_Rows(inp); ++i)
-//       {
-//         GMPmat_getRow(num, den, inp, i-1);
-//         lrs_set_row_mp(Pv,Qv,i,num,den,GE);
-//       }
-
-//       if( lrs_getfirstbasis (&Pv, Qv, &Lin, TRUE) ){
-
-
-//       for (col = 0L; col < Qv->nredundcol; col++)
-//         lrs_printoutput (Qv, Lin[col]); 
-
-//       do
-//         {
-//           for (col = 0L; col <= Pv->d; col++)
-//             if (lrs_getsolution (Pv, Qv, output, col)) {
-//               mpz_to_mpq(curRow, output, GMPmat_Cols(Helper));
-//               Helper = GMPmat_appendRow(Helper, curRow);
-//               GMPmat_everyNrows(Helper, pN, "vertices/rays");
-//             }
-//         }
-//         while (lrs_getnextbasis (&Pv, Qv, FALSE));
-
-//         mpq_row_clean(curRow, GMPmat_Cols(Helper));
-//         lrs_clear_mp_vector (output, Qv->n);
-//         lrs_clear_mp_vector (num, Qv->n);
-//         lrs_clear_mp_vector (den, Qv->n);
-//         lrs_free_dic (Pv,Qv);
-//         lrs_free_dat (Qv);
-
-//         GMPmat_destroy(inp);
-        
-//         return Helper;
-
-//       } else {
-
-//         printf("Empty set.\n");
-//         mpq_row_clean(curRow, GMPmat_Cols(Helper));
-//         lrs_clear_mp_vector (output, Qv->n);
-//         lrs_clear_mp_vector (num, Qv->n);
-//         lrs_clear_mp_vector (den, Qv->n);
-//         lrs_free_dic (Pv,Qv);
-//         lrs_free_dat (Qv);
-        
-//         GMPmat_destroy(inp);
-
-//         return Helper;
-
-//       }
-// }
-
-// struct GMPmat *V2H(struct GMPmat *inp)
-// {
-//     lrs_dic *P;
-//     lrs_dat *Q;
-//     lrs_mp_vector output;
-//     lrs_mp_matrix Lin;
-
-//     long i;
-//     long col;
-
-//     assert( my_lrs_init () == TRUE );
-
-//     Q = lrs_alloc_dat ("LRS globals");
-//     assert ( Q != NULL );
-//     Q->m = GMPmat_Rows(inp);
-//     Q->n = GMPmat_Cols(inp);
-//     Q->hull = TRUE;
-
-//     output = lrs_alloc_mp_vector (Q->n);
-
-//     lrs_mp_vector num, den;
-//     num = lrs_alloc_mp_vector(GMPmat_Cols(inp));
-//     den = lrs_alloc_mp_vector(GMPmat_Cols(inp));
-
-//     P = lrs_alloc_dic (Q);
-//     assert ( P != NULL );
-
-//     struct GMPmat *retMat;
-//     retMat = GMPmat_create(0, GMPmat_Cols(inp), 1);
-      
-//     mpq_t *curRow;
-//     curRow = calloc(GMPmat_Cols(inp), sizeof(mpq_t));
-//     assert( curRow != NULL );
-//     mpq_row_init(curRow, GMPmat_Cols(inp));
-
-
-//     for (i = 1; i <= GMPmat_Rows(inp); ++i)
-//     {
-//       GMPmat_getRow(num, den, inp, i-1);
-//       lrs_set_row_mp(P ,Q ,i ,num ,den , GE);
-//     }
-
-//     if ( lrs_getfirstbasis (&P, Q, &Lin, TRUE) ){
-    
-//     for (col = 0L; col < Q->nredundcol; col++)
-//       lrs_printoutput (Q, Lin[col]);
-
-//     do
-//     {
-//       for (col = 0; col <= P->d; col++)
-//         if (lrs_getsolution (P, Q, output, col)){
-//           mpz_to_mpq(curRow, output, GMPmat_Cols(retMat));
-//           retMat = GMPmat_appendRow(retMat, curRow);
-//           GMPmat_everyNrows(retMat, pN, "inequalities");
-//         }
-//     }
-//     while (lrs_getnextbasis (&P, Q, FALSE));
-
-//     mpq_row_clean( curRow, GMPmat_Cols(retMat) );
-//     lrs_clear_mp_vector ( output, Q->n);
-//     lrs_clear_mp_vector ( num, Q->n);
-//     lrs_clear_mp_vector ( den, Q->n);
-//     lrs_free_dic ( P , Q);
-//     lrs_free_dat ( Q );
-
-//     GMPmat_destroy(inp);
-
-//     return retMat;
-
-//   } else {
-
-//     printf("Empty set.\n");
-//     retMat->empty = 1;
-//     mpq_row_clean( curRow, GMPmat_Cols(retMat) );
-//     lrs_clear_mp_vector ( output, Q->n);
-//     lrs_clear_mp_vector ( num, Q->n);
-//     lrs_clear_mp_vector ( den, Q->n);
-//     lrs_free_dic ( P , Q);
-//     lrs_free_dat ( Q );
-
-//     GMPmat_destroy(inp);
-
-//     return retMat;
-
-//   }
-
-// }
-
 struct GMPmat *reducemat(struct GMPmat *inp)
 {
     lrs_dic *P;
     lrs_dat *Q;
-    lrs_mp_vector output;
     lrs_mp_matrix Lin;
 
     long i;
@@ -757,8 +579,6 @@ struct GMPmat *reducemat(struct GMPmat *inp)
     Q->m = m;
     Q->n = GMPmat_Cols(inp);
 
-    output = lrs_alloc_mp_vector (Q->n);
-
     lrs_mp_vector num, den;
     num = lrs_alloc_mp_vector(GMPmat_Cols(inp));
     den = lrs_alloc_mp_vector(GMPmat_Cols(inp));
@@ -767,7 +587,12 @@ struct GMPmat *reducemat(struct GMPmat *inp)
     assert ( P != NULL );
 
     struct GMPmat *retMat;
-    retMat = GMPmat_create(0, GMPmat_Cols(inp), 1);
+
+    GMPlist* retVal;
+    retVal = malloc(sizeof(GMPlist));
+    retVal->next = NULL;
+    retVal->lte = 0;
+
 
     for (i = 1; i <= m; ++i)
     {
@@ -787,15 +612,14 @@ struct GMPmat *reducemat(struct GMPmat *inp)
       ineq = Q->inequality[i - lastdv] - 1;
       if (!checkindex(P, Q, i))
       {
-        retMat = GMPmat_appendRow(retMat, mpq_row_extract(inp, ineq));
-        GMPmat_everyNrows(retMat, pN, "irredundant inequalities");
+        GMPlist_push(&retVal, mpq_row_extract(inp, ineq));
       }
     }
 
-    lrs_clear_mp_vector ( output, Q->n);
     lrs_free_dic ( P , Q);
     lrs_free_dat ( Q );
 
+    retMat = GMPlist_toGMPmat(retVal, GMPmat_Cols(inp));
     GMPmat_destroy(inp);
 
     return retMat;
@@ -803,8 +627,8 @@ struct GMPmat *reducemat(struct GMPmat *inp)
   } else {
 
     printf("Empty set.\n");
+    retMat = GMPmat_create(0, GMPmat_Cols(inp), 1);
     retMat->empty = 1;
-    lrs_clear_mp_vector ( output, Q->n);
     lrs_free_dic ( P , Q);
     lrs_free_dat ( Q );
 
@@ -819,16 +643,11 @@ struct GMPmat *reducevertices(struct GMPmat *inp)
 {
     lrs_dic *P;
     lrs_dat *Q;
-    lrs_mp_vector output;
     lrs_mp_matrix Lin;
 
     long i;
 
     size_t m = GMPmat_Rows(inp);
-
-    size_t *redRows;
-    redRows = malloc( m*sizeof(*redRows) );
-    assert( redRows != NULL );
 
     assert( my_lrs_init () == TRUE );
 
@@ -838,8 +657,6 @@ struct GMPmat *reducevertices(struct GMPmat *inp)
     Q->n = GMPmat_Cols(inp);
     Q->hull = TRUE;
 
-    output = lrs_alloc_mp_vector (Q->n);
-
     lrs_mp_vector num, den;
     num = lrs_alloc_mp_vector(GMPmat_Cols(inp));
     den = lrs_alloc_mp_vector(GMPmat_Cols(inp));
@@ -848,7 +665,11 @@ struct GMPmat *reducevertices(struct GMPmat *inp)
     assert ( P != NULL );
 
     struct GMPmat *retMat;
-    retMat = GMPmat_create(0, GMPmat_Cols(inp), 1);
+    
+    GMPlist* retVal;
+    retVal = malloc(sizeof(GMPlist));
+    retVal->next = NULL;
+    retVal->lte = 0;
 
     for (i = 1; i <= m; ++i)
     {
@@ -868,15 +689,13 @@ struct GMPmat *reducevertices(struct GMPmat *inp)
       ineq = Q->inequality[i - lastdv] - 1;
       if (!checkindex(P, Q, i))
       {
-        retMat = GMPmat_appendRow(retMat, mpq_row_extract(inp, ineq));
-        GMPmat_everyNrows(retMat, pN, "irredundant vertices/rays");
+        GMPlist_push(&retVal, mpq_row_extract(inp, ineq));
       }
     }
 
-    lrs_clear_mp_vector ( output, Q->n);
     lrs_free_dic ( P , Q);
     lrs_free_dat ( Q );
-
+    retMat = GMPlist_toGMPmat(retVal, GMPmat_Cols(inp));
     GMPmat_destroy(inp);
     
     return retMat;
@@ -884,8 +703,8 @@ struct GMPmat *reducevertices(struct GMPmat *inp)
   } else {
 
     printf("Empty set.\n");
+    retMat = GMPmat_create(0, GMPmat_Cols(inp), 1);
     retMat->empty = 1;
-    lrs_clear_mp_vector ( output, Q->n);
     lrs_free_dic ( P , Q);
     lrs_free_dat ( Q );
 
