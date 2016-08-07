@@ -1652,11 +1652,8 @@ mxArray *directCallWrapper(const mxArray *data)
 
     if (Q->getvolume)
     {
-      double cestVol = Q->cest[3];
+      rescalevolume (P, Q, Q->Nvolume, Q->Dvolume);
       rattodouble (Q->Nvolume, Q->Dvolume, &volume);
-      for (i = 2; i < P->d; i++)
-        cestVol = cestVol / i;  /*adjust for dimension */
-      volume += cestVol;
     }
 
 
