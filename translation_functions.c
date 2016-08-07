@@ -1538,7 +1538,7 @@ mxArray *directCallWrapper(const mxArray *data)
       if (curField == NULL )
         mexErrMsgTxt("No vertices or rays passed.\n");
       else {
-        if (!mxIsDouble(curField) || mxIsSparse(curField) || mxIsComplex(curField))
+        if (!mxIsDouble(curField) || mxIsSparse(curField) || mxIsComplex(curField) || mxIsEmpty(curField))
           mexErrMsgTxt("All data must be real, dense and numeric.\n");
         mxArray *typeVec;
         typeVec = MXArray_constantVector(mxGetM(curField), 0.);
@@ -1548,7 +1548,7 @@ mxArray *directCallWrapper(const mxArray *data)
       }
     } else {
       /* Extract Vertices */
-      if (!mxIsDouble(curField) || mxIsSparse(curField) || mxIsComplex(curField))
+      if (!mxIsDouble(curField) || mxIsSparse(curField) || mxIsComplex(curField) || mxIsEmpty(curField))
         mexErrMsgTxt("All data must be real, dense and numeric.\n");
       mxArray *typeVec;
       typeVec = MXArray_constantVector(mxGetM(curField), 1.);
@@ -1705,7 +1705,7 @@ mxArray *directCallWrapper(const mxArray *data)
     if (curField == NULL || rhs == NULL )
       mexErrMsgTxt("Fields 'Aineq' and 'bineq' are required for H-representation.\n");
 
-    if ( (!mxIsDouble(curField) || mxIsSparse(curField) || mxIsComplex(curField)) || (!mxIsDouble(rhs) || mxIsComplex(rhs)) )
+    if ( (!mxIsDouble(curField) || mxIsSparse(curField) || mxIsComplex(curField)) || mxIsEmpty(curField) || (!mxIsDouble(rhs) || mxIsComplex(rhs)) )
         mexErrMsgTxt("All data must be real, dense and numeric.\n");
    
     if (mxGetM(curField) != mxGetM(rhs))
@@ -1720,7 +1720,7 @@ mxArray *directCallWrapper(const mxArray *data)
       if (beq == NULL)
         mexErrMsgTxt("'beq' must be provided.\n");
       
-      if ( (!mxIsDouble(Aeq) || mxIsSparse(Aeq) || mxIsComplex(Aeq)) || (!mxIsDouble(beq) || mxIsComplex(beq)) )
+      if ( (!mxIsDouble(Aeq) || mxIsSparse(Aeq) || mxIsComplex(Aeq)) || (!mxIsDouble(beq) || mxIsComplex(beq)) || mxIsEmpty(Aeq) )
         mexErrMsgTxt("All data must be real, dense and numeric.\n");
 
       if (mxGetN(curField) != mxGetN(Aeq))
