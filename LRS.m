@@ -1,5 +1,5 @@
-function [Data,data] = LRS(s)
-% [Data,data] = LRS(s)
+function [Data,data,volume] = LRS(s)
+% [Data,data,volume] = LRS(s)
 % Direct LRS call.
 % Structure s is used to pass data to the LRS engine.
 %
@@ -9,6 +9,7 @@ function [Data,data] = LRS(s)
 % s.R = R Matrix holding all rays, each row is one ray.
 % At least one of the two must be non-trivial.
 % Result is H-representation {x:Data*x<=data}.
+% If s.getvolume is passed volume holds the volume of the polytope.
 %
 % For H-representation:
 % s.rep = 'H'
@@ -27,3 +28,4 @@ function [Data,data] = LRS(s)
 temp = calllib('libgeocalc','lrsCall',s);
 Data = temp{1};
 data = temp{2};
+volume = temp{3};

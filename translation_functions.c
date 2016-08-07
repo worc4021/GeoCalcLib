@@ -198,6 +198,62 @@ mxArray *VertBreakdown(const mxArray *res)
 
 }
 
+mxArray *VertBreakdownWithVolume(const mxArray *res, double Volume)
+{
+  size_t m, n;
+  m = mxGetM(res);
+  n = mxGetN(res) - 1;
+  
+  mxArray *A, *b, *vol;
+  A = mxCreateNumericMatrix(0, 0, mxDOUBLE_CLASS, mxREAL);
+  b = mxCreateNumericMatrix(0, 0, mxDOUBLE_CLASS, mxREAL);
+  vol = mxCreateNumericMatrix(1,1, mxDOUBLE_CLASS, mxREAL);
+
+  double *A_data, *b_data, *vol_data, *res_data;
+  res_data = mxGetPr(res);
+
+  A_data = mxMalloc( m*n*sizeof(*A_data) );
+  b_data = mxMalloc( m*sizeof(*b_data) );
+  vol_data = mxMalloc( sizeof(*vol_data) ); 
+  
+  memcpy(b_data, res_data, m*sizeof(*res_data) );
+  memcpy(A_data, res_data + m, m*n*sizeof(*res_data) );
+  *vol_data = Volume;
+
+  mxSetPr(A, A_data);
+  mxSetM(A, m);
+  mxSetN(A, n);
+
+  mxSetPr(b, b_data);
+  mxSetM(b, m);
+  mxSetN(b, 1);
+
+  mxSetPr(vol, vol_data);
+
+  mxArray *retVal;
+  mwSize ndim=2, dims[]={1, 3}, nsubs=2, subs[2];
+  mwIndex index;
+  retVal = mxCreateCellArray( ndim, dims );
+
+  subs[0] = 0;
+  subs[1] = 0;
+  index = mxCalcSingleSubscript(retVal, nsubs, subs);
+  mxSetCell (retVal, index , A);
+
+  subs[1] = 1;
+  index = mxCalcSingleSubscript(retVal, nsubs, subs);
+  mxSetCell (retVal, index , b);
+
+  subs[1] = 2;
+  index = mxCalcSingleSubscript(retVal, nsubs, subs);
+  mxSetCell (retVal, index , vol);
+
+  return retVal;
+
+}
+
+
+
 mxArray *createEmptyCell( )
 {
   mxArray *A, *b;
@@ -1436,6 +1492,17 @@ mxArray *directCallWrapper(const mxArray *data)
       mexErrMsgTxt("'maxdepth' must be a non-negative real number.\n");
   }
 
+  double volume = 0;
+  long getvolume = 0L;
+  curField = extractField(data, "getvolume");
+  if (curField != NULL){
+    if (( !mxIsScalar(curField) || !mxIsDouble(curField) || mxIsComplex(curField) ))
+      mexErrMsgTxt("'getvolume' must be 0 or 1.\n");
+
+    getvolume = 1L;
+  }
+
+
   long maxoutput = 0L;
   curField = extractField(data, "maxoutput");
   if ( curField != NULL ){
@@ -1540,6 +1607,8 @@ mxArray *directCallWrapper(const mxArray *data)
       Q->maxoutput = maxoutput;
     if (maxcobases)
       Q->maxcobases = maxcobases;
+    if (getvolume)
+      Q->getvolume = getvolume;
 
     output = lrs_alloc_mp_vector (Q->n);
 
@@ -1580,6 +1649,16 @@ mxArray *directCallWrapper(const mxArray *data)
         }
     }
     while (lrs_getnextbasis (&P, Q, FALSE));
+
+    if (Q->getvolume)
+    {
+      double cestVol = Q->cest[3];
+      rattodouble (Q->Nvolume, Q->Dvolume, &volume);
+      for (i = 2; i < P->d; i++)
+        cestVol = cestVol / i;  /*adjust for dimension */
+      volume += cestVol;
+    }
+
 
     lrs_clear_mp_vector ( output, Q->n);
     lrs_clear_mp_vector ( num, Q->n);
@@ -1808,7 +1887,8 @@ mxArray *directCallWrapper(const mxArray *data)
 
   }
     mxArray *returnValue;
-    returnValue = VertBreakdown(retArray);
+    returnValue = VertBreakdownWithVolume(retArray,volume);
+
     mxDestroyArray(retArray);
     return returnValue;
 }

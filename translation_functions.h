@@ -54,6 +54,7 @@ mxArray *MXArray_fromGMPmat(const struct GMPmat *A);
 size_t MXArray_to_integer(const mxArray *pm);
 mxArray *VertConcat(const mxArray *A, const mxArray *b);
 mxArray *VertBreakdown(const mxArray *res);
+mxArray *VertBreakdownWithVolume(const mxArray *res, double Volume);
 mxArray *createEmptyCell( );
 mxArray *MXArray_stack(mxArray *A, mxArray *B);
 mxArray *MXArray_fromGMPlist(GMPlist *A, size_t n);
