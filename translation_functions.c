@@ -1253,6 +1253,21 @@ mpq_t *mpz_to_mpq_vec(mpz_t *op, size_t m)
             mpq_canonicalize(retVal[i]);
         }
         mpz_clear(norm);
+    }else if ( !(mpz_cmp_si(op[0],0L)+1) ){
+        
+        mpq_t valueHolder;
+        mpq_init(valueHolder);
+
+        for (i = 0; i < m; ++i)
+        {
+            mpq_init(retVal[i]);
+            mpq_set_num(valueHolder, op[i]);
+            mpq_set_den(valueHolder, op[0]);
+            mpq_canonicalize(valueHolder);
+            mpq_neg(retVal[i],valueHolder);
+        }
+        mpq_clear(valueHolder);
+
     }else{
         for (i = 0; i < m; ++i)
         {
