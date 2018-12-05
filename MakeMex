@@ -12,7 +12,7 @@ endif
 
 CFLAGS = -Wall -fpic
 CFLAGS += -DGMP -DTIMES -DSIGNALS -DB64 -DLRS_QUIET -DNOINFO -DDIRECT
-#CFLAGS += -I/usr/local/Cellar/gmp/6.1.2_2/include/
+CFLAGS += -I$(GMPINCLUDE)
 
 MEX = $(MATLABROOT)/bin/mex
 

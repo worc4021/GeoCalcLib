@@ -19,12 +19,30 @@ void mexFunction(int nlhs, mxArray *plhs[],
 
     retVal = vertexEnumeration(A,b);
 
-    V = mxGetCell(retVal, 0);
-    type = mxGetCell(retVal,1);
+    mwSize ndim=2, dims[]={1, 2}, nsubs=2, subs[2];
+    mwIndex index;
+    subs[0] = 0;
+    subs[1] = 0;
+    index = mxCalcSingleSubscript(retVal, nsubs, subs);
+
+    V = mxGetCell(retVal, index);
+    if (NULL == V)
+        mexPrintf("V is null\n");
+
+    subs[1] = 1;
+    index = mxCalcSingleSubscript(retVal, nsubs, subs);
+
+    type = mxGetCell(retVal,index);
+
+    if (NULL == type)
+        mexPrintf("type is null\n");
 
     if (nlhs==2)
-        plhs[1] = type;
+        plhs[1] = mxDuplicateArray(type);
 
-    plhs[0] = V;
+    plhs[0] = mxDuplicateArray(V);
+
+    mxDestroyArray(retVal);
+
 
 }
