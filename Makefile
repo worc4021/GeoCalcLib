@@ -9,7 +9,7 @@ CFLAGS = -Wall -fpic
 CFLAGS += -DGMP -DTIMES -DSIGNALS -DB64 -DLRS_QUIET -DNOINFO -DDIRECT
 
 
-# Set DEBUG macro for functions to print GMPmat and mpx_t type data in debugger, 
+# Set DEBUG macro for functions to print GMPmat and mpx_t type data in debugger,
 # set NOINFO macro to avoid printing out number of rows/vertices/rays found during computation.
 # CFLAGS += -DDEBUG
 # DFLAG = -g
@@ -23,7 +23,7 @@ ifeq ($(UNAME_S),Darwin)
 	EXTENTION = dylib
 	MATLABLIB = $(MATLABROOT)/bin/maci64/
 endif
-ifeq ($(UNAME_S),Linux)	
+ifeq ($(UNAME_S),Linux)
 	LFLAGS += -Wl,-rpath,$(MATLABLIB)
 	EXTENTION = so
 	MATLABLIB = $(MATLABROOT)/bin/glnxa64/
@@ -37,7 +37,7 @@ all: libgeocalc.$(EXTENTION)
 	rm *.o
 
 libgeocalc.$(EXTENTION): $(OBJECTS)
-	$(CC) $(LFLAGS) $(DFLAG) $^ -o libgeocalc.$(EXTENTION) 
+	$(CC) $(LFLAGS) $(DFLAG) $^ -o libgeocalc.$(EXTENTION)
 
 .c.o:
 	$(CC) $(DFLAG) $(CFLAGS) -I$(MATLABINCLUDEDIR) $< -o $@ -c

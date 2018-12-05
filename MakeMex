@@ -1,0 +1,39 @@
+UNAME_S := $(shell uname -s)
+CURRDIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+include $(CURRDIR)/User.make
+
+ifeq ($(UNAME_S),Darwin)
+	EXTENTION = mexmaci64
+endif
+ifeq ($(UNAME_S),Linux)
+	EXTENTION = mexa64 
+endif
+
+
+CFLAGS = -Wall -fpic
+CFLAGS += -DGMP -DTIMES -DSIGNALS -DB64 -DLRS_QUIET -DNOINFO -DDIRECT
+#CFLAGS += -I/usr/local/Cellar/gmp/6.1.2_2/include/
+
+MEX = $(MATLABROOT)/bin/mex
+
+LFLAGS = -lgmp
+
+OBJECTS = mainFunctions.o translation_functions.o lrslib.o lrsgmp.o
+
+PRODUCTS = vertexEnumeration.$(EXTENTION) facetEnumeration.$(EXTENTION)
+
+all: $(PRODUCTS)
+	mv *.$(EXTENTION) $(INSTALLDIR)
+
+
+vertexEnumeration.$(EXTENTION): vertexEnumeration.o $(OBJECTS)
+	$(MEX) vertexEnumeration.o $(OBJECTS) $(LFLAGS)
+
+facetEnumeration.$(EXTENTION): facetEnumeration.o $(OBJECTS)
+	$(MEX) facetEnumeration.o $(OBJECTS) $(LFLAGS)
+
+.c.o:
+	$(MEX) $< -c CFLAGS='$(DFLAG) $(CFLAGS)'
+
+clean:
+	rm -f *.o *.$(EXTENTION)
