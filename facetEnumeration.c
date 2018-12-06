@@ -8,22 +8,28 @@ void mexFunction(int nlhs, mxArray *plhs[],
     const mxArray *V;
     mxArray *type;
     double *typePtr;
-    if (nrhs!=2){
+    int doClean = 0;
+
+    V = prhs[0];
+
+    if (nrhs<2){
+        doClean = 1;
         type = mxCreateDoubleMatrix(mxGetM(V),1, mxREAL);
         typePtr = mxGetPr(type);
         for (mwSize i = 0; i != mxGetM(V); i++)
             typePtr[i] = 1.;
     } else {
+    
         type = prhs[1];
     }
 
-    V = prhs[0];
-
+    
     mxArray *retVal;
     mxArray *A;
     mxArray *b;
 
     retVal = facetEnumeration(V,type);
+
 
     mwSize ndim=2, dims[]={1, 2}, nsubs=2, subs[2];
     mwIndex index;
@@ -40,10 +46,12 @@ void mexFunction(int nlhs, mxArray *plhs[],
     b = mxGetCell(retVal, index);
     if (NULL == b)
         mexPrintf("b is null\n");
+    plhs[0] = mxDuplicateArray(A);
 
     if (nlhs==2)
-        plhs[1] = b;
-
-    plhs[0] = A;
+        plhs[1] = mxDuplicateArray(b);
+    mxDestroyArray(retVal);
+    if (doClean)
+        mxDestroyArray(type);
 
 }
