@@ -2,6 +2,7 @@
 *.mat
 *.o
 *.mexmaci64
+*.mexa64
 *.dylib
 *.so
 Makefile

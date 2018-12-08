@@ -5,8 +5,11 @@
 void mexFunction(int nlhs, mxArray *plhs[],
                  int nrhs, const mxArray *prhs[])
 {
+    if (nrhs<1)
+        mexErrMsgTxt("Not enough inputs.");
+        
     const mxArray *V;
-    mxArray *type;
+    const mxArray *type;
     double *typePtr;
     int doClean = 0;
 
@@ -19,7 +22,6 @@ void mexFunction(int nlhs, mxArray *plhs[],
         for (mwSize i = 0; i != mxGetM(V); i++)
             typePtr[i] = 1.;
     } else {
-    
         type = prhs[1];
     }
 
@@ -31,7 +33,7 @@ void mexFunction(int nlhs, mxArray *plhs[],
     retVal = facetEnumeration(V,type);
 
 
-    mwSize ndim=2, dims[]={1, 2}, nsubs=2, subs[2];
+    mwSize nsubs=2, subs[2];
     mwIndex index;
     subs[0] = 0;
     subs[1] = 0;
@@ -52,6 +54,6 @@ void mexFunction(int nlhs, mxArray *plhs[],
         plhs[1] = mxDuplicateArray(b);
     mxDestroyArray(retVal);
     if (doClean)
-        mxDestroyArray(type);
+        mxDestroyArray((mxArray*)type);
 
 }

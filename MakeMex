@@ -20,7 +20,9 @@ LFLAGS = -lgmp
 
 OBJECTS = mainFunctions.o translation_functions.o lrslib.o lrsgmp.o
 
-PRODUCTS = vertexEnumeration.$(EXTENTION) facetEnumeration.$(EXTENTION)
+PRODUCTS = vertexEnumeration.$(EXTENTION) facetEnumeration.$(EXTENTION) \
+		 inequalityReduction.$(EXTENTION) projectPolyhedron.$(EXTENTION) \
+		 vertexReduction.$(EXTENTION) lrs.$(EXTENTION)
 
 all: $(PRODUCTS)
 	mv *.$(EXTENTION) $(INSTALLDIR)
@@ -31,6 +33,18 @@ vertexEnumeration.$(EXTENTION): vertexEnumeration.o $(OBJECTS)
 
 facetEnumeration.$(EXTENTION): facetEnumeration.o $(OBJECTS)
 	$(MEX) facetEnumeration.o $(OBJECTS) $(LFLAGS)
+
+inequalityReduction.$(EXTENTION): inequalityReduction.o $(OBJECTS)
+	$(MEX) inequalityReduction.o $(OBJECTS) $(LFLAGS)
+
+projectPolyhedron.$(EXTENTION): projectPolyhedron.o $(OBJECTS)
+	$(MEX) projectPolyhedron.o $(OBJECTS) $(LFLAGS)
+
+vertexReduction.$(EXTENTION): vertexReduction.o $(OBJECTS)
+	$(MEX) vertexReduction.o $(OBJECTS) $(LFLAGS)
+
+lrs.$(EXTENTION): lrs.o $(OBJECTS)
+	$(MEX) lrs.o $(OBJECTS) $(LFLAGS)
 
 .c.o:
 	$(MEX) $< -c CFLAGS='$(DFLAG) $(CFLAGS)'

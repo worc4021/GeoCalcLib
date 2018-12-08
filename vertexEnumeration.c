@@ -19,7 +19,7 @@ void mexFunction(int nlhs, mxArray *plhs[],
 
     retVal = vertexEnumeration(A,b);
 
-    mwSize ndim=2, dims[]={1, 2}, nsubs=2, subs[2];
+    mwSize nsubs=2, subs[2];
     mwIndex index;
     subs[0] = 0;
     subs[1] = 0;
