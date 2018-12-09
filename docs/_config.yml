@@ -16,12 +16,12 @@ url: "http://worc4021.github.io/GeoCalcLib" # the base hostname & protocol for y
 github_username:  worc4021
 
 # Where things are
-source:      /Users/Manuel/Documents/Development/GeoCalcLib/Page
-destination: /Users/Manuel/Documents/Adobe/Website/worc4021.github.io
-plugins_dir:  /Users/Manuel/Documents/Development/GeoCalcLib/Page/_plugins
-layouts_dir:  /Users/Manuel/Documents/Development/GeoCalcLib/Page/_layouts
-data_dir:     /Users/Manuel/Documents/Development/GeoCalcLib/Page/_data
-includes_dir: /Users/Manuel/Documents/Development/GeoCalcLib/Page/_includes
+source:      ./
+destination: http://worc4021.github.io/GeoCalcLib
+plugins_dir:  ./_plugins
+layouts_dir:  ./_layouts
+data_dir:     ./_data
+includes_dir: ./_includes
 collections:  null
 
 # Handling Reading
