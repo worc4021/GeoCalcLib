@@ -1,6 +1,6 @@
 UNAME_S := $(shell uname -s)
 CURRDIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
-include $(CURRDIR)/User.make
+include $(CURRDIR)/../User.make
 
 ifeq ($(UNAME_S),Darwin)
 	EXTENTION = mexmaci64
