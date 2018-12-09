@@ -5,7 +5,7 @@ date:   2016-04-08 12:32:35 +0100
 categories: jekyll update
 ---
 
->[!WARNING]
+<!-- >[!WARNING]
 > This way of setting up the GeoCalcLib has been deprecated due to maintanence difficulties.
 
 
@@ -16,15 +16,15 @@ The [LRS library][lrs-link] works on both Mac and Linux and can be made to work 
 
 In order to work you will need the [GMP Library][gmp] installed on your system. 
 During the build of the GMP library, make sure you install it with the same ABI as your Matlab, i.e. if you have a 64-bit Matlab make sure you select `ABI=64` during your build. 
-If you are unsure which Matlab version you have, run
+If you are unsure which Matlab version you have, run -->
 
-{% highlight matlab %}
+<!-- {% highlight matlab %}
 >>ver matlab
 {% endhighlight %}
 
-and check which Java version is linked, they are installed compatibly. The GeoCalcLib is untested on 32-bit installations.
+and check which Java version is linked, they are installed compatibly. The GeoCalcLib is untested on 32-bit installations. -->
 
-
+A prerequisite to run the GeoCalcLib is to have the [GMP Library][gmp] on your machine. At build time, you will need the main header file `gmp.h` however the library itself is largely irrelevant, as Matlab provides a gmp redistributable.
 
 To install the GeoCalcLib open your Terminal navigate to your desired directory and clone the repository by typing
 
@@ -38,10 +38,18 @@ and the desired installation directory `INSTALLDIR` *(a directory on your Matlab
 
 {% highlight make %}
 # Specify the absolute path to your Matlab installation
-MATLABROOT = /Applications/MATLAB_R2016a.app
+MATLABROOT = /Applications/MATLAB_R2018b.app
 
 # Path to which everything should be installed, has to be on Matlab path!
 INSTALLDIR = /Users/Username/Documents/MATLAB/Functions
+{% endhighlight %}
+
+If necessary add `GMPINCLUDE` with the path to the `gmp.h` file (I only had to do this on osx).
+
+Run make
+
+{% highlight bash %}
+make
 {% endhighlight %}
 
 If you do not yet have a directory on your Matlab path to store your functions and want to add one, run `edit startup` in Matlab and add 
@@ -52,8 +60,9 @@ addpath('/absolute/path/to/your/directory');
 
 or find [alternative ways of setting up your path here][matlab-path].
 
+You should now be set up.
 
-Now you can run 
+<!-- Now you can run 
 
 {% highlight bash %}
 make
@@ -104,7 +113,7 @@ at the beginning of your session and
 unloadlibrary('libgeocalc');
 {% endhighlight %}
 
-at the end of your session.
+at the end of your session. -->
 
 
 [lrs-link]: http://cgm.cs.mcgill.ca/~avis/C/lrs.html

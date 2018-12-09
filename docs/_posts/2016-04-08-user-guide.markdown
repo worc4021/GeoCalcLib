@@ -17,7 +17,7 @@ The GeoCalcLib provides five different wrappers to call the LRS routines:
 3. `inequalityReduction()` produces an irredundant half space description for a polyhedron in half space description.
 4. `vertexReduction()` produces an irredundant vertex/ray description of a polyhedron in vertex/ray description.
 5. `projectPolyhedron()` does not call a LRS routine, but projects a polyhedron in half space description and returns the result in half space description.
-6. `LRS()` allows passing more data to the LRS engine to perform the vertex and facet enumeration. Allows passing parameters.
+6. `lrs()` allows passing more data to the LRS engine to perform the vertex and facet enumeration. Allows passing parameters.
 
 On top of the direct interface to the LRS library `createLRSfile()` and `readLRSfile()` are provided to write and read an LRS input file respectively.
 
@@ -190,7 +190,7 @@ Assume we want to facet enumerate the first quadrant, i.e. $$P=\text{cone}\left\
 
 {% highlight matlab %}
 s = struct('rep','V','R',eye(2));
-[A,b] = LRS(s)
+[A,b] = lrs(s)
 A =
 
      0    -1
@@ -230,7 +230,7 @@ that is the representation of `rep='H'`
 
 {% highlight matlab %}
 s = struct('rep','H','Aineq',-eye(3),'bineq',zeros(3,1),'Aeq',ones(1,3),'beq',1);
-[V,t] = LRS(s)
+[V,t] = lrs(s)
 V =
 
      1     0     0
@@ -255,7 +255,7 @@ In addition to the computational data parameters may be passed, so far `maxcobas
 If we want to restrict the number of search depth in the vertex enumeration of a 12-dimensional cube, and further we also want to constrain the number of explored cobases and only need 5 vertices we would call
 
 {% highlight matlab %}
-[V,t] = LRS(struct('rep','H','Aineq',[eye(12);-eye(12)],'bineq',ones(24,1),'maxdepth',3,'maxcobases',12,'maxoutput',5))
+[V,t] = lrs(struct('rep','H','Aineq',[eye(12);-eye(12)],'bineq',ones(24,1),'maxdepth',3,'maxcobases',12,'maxoutput',5))
 
 V =
 

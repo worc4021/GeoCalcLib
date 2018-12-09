@@ -43,4 +43,4 @@ Notice, that if you have not loaded the library Matlab will not allow you to qui
 since it tries to unload the library by calling finish.m
 
 [lrs]: http://cgm.cs.mcgill.ca/~avis/C/lrs.html
-[home]: http://worc4021.github.io
+[home]: http://worc4021.github.io/GeoCalcLib
