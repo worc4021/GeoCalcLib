@@ -1,6 +1,6 @@
 
 all:
-	make -f ./src/MakeMex
+	make -C src -f MakeMex
 
 clean:
-	make -f ./src/MakeMex clean
+	make -C src -f MakeMex clean

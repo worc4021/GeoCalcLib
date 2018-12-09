@@ -24,9 +24,8 @@ PRODUCTS = vertexEnumeration.$(EXTENTION) facetEnumeration.$(EXTENTION) \
 		 inequalityReduction.$(EXTENTION) projectPolyhedron.$(EXTENTION) \
 		 vertexReduction.$(EXTENTION) lrs.$(EXTENTION)
 
-all: $(PRODUCTS)
+all: $(PRODUCTS) mfiles
 	mv *.$(EXTENTION) $(INSTALLDIR)
-
 
 vertexEnumeration.$(EXTENTION): vertexEnumeration.o $(OBJECTS)
 	$(MEX) vertexEnumeration.o $(OBJECTS) $(LFLAGS)
@@ -48,6 +47,9 @@ lrs.$(EXTENTION): lrs.o $(OBJECTS)
 
 .c.o:
 	$(MEX) $< -c CFLAGS='$(DFLAG) $(CFLAGS)'
+
+mfiles:
+	cp ../aux/*.m $(INSTALLDIR)
 
 clean:
 	rm -f *.o *.$(EXTENTION)

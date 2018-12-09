@@ -1112,7 +1112,7 @@ struct GMPmat *GMPmat_stackVert(struct GMPmat *A, struct GMPmat *B)
 
   for (i = 0; i< B->m ; i++)
   {
-    for (j = 0; i < n; j++)
+    for (j = 0; j < n; j++)
     {
       mpq_init(retVal->data[(A->m-1)*n+i*n +j]);
       mpq_set(retVal->data[(A->m-1)*n+i*n +j],B->data[i*n + j]);
