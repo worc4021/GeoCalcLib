@@ -7,7 +7,7 @@
 
 # Site settings
 title: GeoCalcLib
-email: rainer.schaich@eng.ox.ac.uk
+email: rmschaich@outlook.com
 description: > # this means to ignore newlines until "baseurl:"
   Homepage of the GeoCalcLib, a Matlab interface for the LRS library.
 baseurl: "" # the subpath of your site, e.g. /blog
