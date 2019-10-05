@@ -23,13 +23,13 @@ and the desired installation directory `INSTALLDIR` *(a directory on your Matlab
 
 {% highlight make %}
 # Specify the absolute path to your Matlab installation
-MATLABROOT = /Applications/MATLAB_R2018b.app
+MATLABROOT = /Applications/MATLAB_R2019b.app
 
 # Path to which everything should be installed, has to be on Matlab path!
 INSTALLDIR = /Users/Username/Documents/MATLAB/Functions
 {% endhighlight %}
 
-If necessary add `GMPINCLUDE` with the path to the `gmp.h` file (I only had to do this on osx).
+If necessary add `GMPINCLUDE` with the path to the `gmp.h` file (I only had to do this on osx ).
 
 Run make
 
